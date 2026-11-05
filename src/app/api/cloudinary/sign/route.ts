@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicEnv } from "@/lib/public-config";
 import { signUploadParams, CLOUDINARY_FOLDERS } from "@/lib/cloudinary";
 import { requireAdmin, requireProvider, requireUser } from "@/lib/parse/require-admin";
 
@@ -58,6 +59,6 @@ export async function POST(request: Request) {
     timestamp,
     folder,
     apiKey: process.env.CLOUDINARY_API_KEY,
-    cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    cloudName: publicEnv("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME"),
   });
 }

@@ -9,20 +9,20 @@
  */
 import "server-only";
 import Parse from "parse/node";
+import { publicEnv } from "@/lib/public-config";
 
 let initialized = false;
 
 export function getParseAdmin(): typeof Parse {
   if (!initialized) {
-    const appId = process.env.NEXT_PUBLIC_PARSE_APP_ID;
-    const jsKey = process.env.NEXT_PUBLIC_PARSE_JS_KEY;
+    const appId = publicEnv("NEXT_PUBLIC_PARSE_APP_ID");
+    const jsKey = publicEnv("NEXT_PUBLIC_PARSE_JS_KEY");
     const masterKey = process.env.PARSE_MASTER_KEY;
-    const serverURL = process.env.NEXT_PUBLIC_PARSE_SERVER_URL;
+    const serverURL = publicEnv("NEXT_PUBLIC_PARSE_SERVER_URL");
 
     if (!appId || !masterKey || !serverURL) {
       throw new Error(
-        "Missing Parse admin configuration. Set NEXT_PUBLIC_PARSE_APP_ID, " +
-          "PARSE_MASTER_KEY and NEXT_PUBLIC_PARSE_SERVER_URL in .env.local.",
+        "Missing Parse admin configuration. Set PARSE_MASTER_KEY as a Worker secret.",
       );
     }
 

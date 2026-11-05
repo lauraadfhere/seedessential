@@ -6,9 +6,12 @@
  */
 import "server-only";
 import { v2 as cloudinary } from "cloudinary";
+import { publicEnv } from "@/lib/public-config";
 
 cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  // Resolved through publicEnv so the value survives a build that did not
+  // receive NEXT_PUBLIC_* (Workers Builds never sees dashboard runtime vars).
+  cloud_name: publicEnv("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME"),
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
@@ -37,7 +40,7 @@ export const CLOUDINARY_FOLDERS = {
 export function signUploadParams(paramsToSign: Record<string, string | number>) {
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
   if (!apiSecret) {
-    throw new Error("Missing CLOUDINARY_API_SECRET in .env.local");
+    throw new Error("Missing CLOUDINARY_API_SECRET");
   }
   const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
   return signature;

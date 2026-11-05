@@ -2,6 +2,8 @@
 .env.*
 !.env.example
 !.env.sample
+# Public (non-secret) build-time values; committed on purpose.
+!.env.production
 node_modules/
 vendor/
 .next/
