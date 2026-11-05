@@ -1,56 +1,76 @@
 # Cloudflare Workers: Production Variables
 
-This file lists every environment variable the Tannelli app reads, so the Workers deployment works in production. Set values in the Cloudflare dashboard or with Wrangler. Never commit real values.
+Worker: `seedessential` · Custom domain: `https://seedessential.eu.cc` · Stack: vinext (`cloudflare.config.ts` + `vite.config.ts`)
 
-## Important: build-time vs runtime
+## Why the deployed site showed "Missing Parse configuration"
 
-- **`NEXT_PUBLIC_*` variables are inlined into the JavaScript bundle at build time.** They must be present when `yarn build` / `yarn deploy` runs, not only at runtime. In Cloudflare Workers Builds, add them under the build environment variables. If you deploy from your computer, set them in `.env.local` before running `yarn deploy`.
-- **Other variables are read at runtime on the server.** Set them as Worker variables, or as secrets for sensitive values.
+`NEXT_PUBLIC_*` values are **frozen into the browser JavaScript when the app is built**. Cloudflare Workers Builds does **not** give the build step the dashboard *runtime* variables — those exist only inside the running Worker. Your Parse and Cloudinary values were set as runtime variables, and `.env.local` is gitignored so the build never saw it. The result: server-rendered HTML had the Cloudinary URLs, but the browser bundle had `undefined`, so hydration threw.
 
-## Required variables
+`src/lib/public-config.ts` now supplies those public identifiers as fallbacks, so the bundle always has them and an environment variable still overrides them. This removes the dependency on dashboard build variables.
 
-| Variable | Used for | Type | Where it's read |
-|---|---|---|---|
-| `NEXT_PUBLIC_PARSE_APP_ID` | Parse (Back4App) application ID | Plain (build-time) | `src/lib/parse/client.ts`, `src/lib/parse/admin.ts` |
-| `NEXT_PUBLIC_PARSE_JS_KEY` | Parse JavaScript key | Plain (build-time) | `src/lib/parse/client.ts`, `src/lib/parse/admin.ts` |
-| `NEXT_PUBLIC_PARSE_SERVER_URL` | Parse server URL, e.g. `https://parseapi.back4app.com/` | Plain (build-time) | `src/lib/parse/client.ts`, `src/lib/parse/admin.ts` |
-| `PARSE_MASTER_KEY` | Parse master key for server-side admin writes | **Secret** | `src/lib/parse/admin.ts` |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name for image URLs and uploads | Plain (build-time) | `src/lib/cloudinary.ts`, `src/lib/cloudinary-client.ts`, `src/app/api/cloudinary/sign/route.ts` |
-| `CLOUDINARY_API_KEY` | Cloudinary API key for signed uploads | Plain | `src/lib/cloudinary.ts`, `src/app/api/cloudinary/sign/route.ts` |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret for signing uploads | **Secret** | `src/lib/cloudinary.ts` |
-| `NVIDIA_API_KEY` | NVIDIA AI API key used by the server-side engine | **Secret** | `src/lib/ruddge/engine.ts` |
+## Required at build time (now built in)
 
-## Optional variables
+| Variable | Value source | Notes |
+|---|---|---|
+| `NEXT_PUBLIC_PARSE_APP_ID` | fallback in `src/lib/public-config.ts` | Public by design |
+| `NEXT_PUBLIC_PARSE_JS_KEY` | fallback in `src/lib/public-config.ts` | Public by design |
+| `NEXT_PUBLIC_PARSE_SERVER_URL` | fallback in `src/lib/public-config.ts` | `https://parseapi.back4app.com/` |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | fallback in `src/lib/public-config.ts` | `n08p7st8` |
+| `NEXT_PUBLIC_ENABLE_WATERMARK` | fallback (`false`) | Set to `true` to turn the watermark on |
 
-| Variable | Used for | Type | Notes |
-|---|---|---|---|
-| `NEXT_PUBLIC_ENABLE_WATERMARK` | Turns the image watermark on when set to `true` | Plain (build-time) | Read in `src/lib/cloudinary-client.ts`. Defaults to off. |
+If you prefer to keep them out of source, set them as **Build variables and secrets** in the dashboard (Settings → Build) and they will override the fallbacks. Runtime variables are not enough for that.
 
-## Present in local files but not read by the app
+## Required at runtime (encrypted secrets)
 
-These are in `.env.local` or `.env.example`, but no code in `src/` reads them. You do not need to set them in Cloudflare.
-
-- `PARSE_CLIENT_KEY`
-- `CLOUDINARY_URL` (the app uses the separate key and secret above)
-- `DATABASE_URL` (the app stores data in Parse, not MySQL)
-
-## Setting them with Wrangler (CLI)
+| Variable | Used for | Read by |
+|---|---|---|
+| `PARSE_MASTER_KEY` | privileged server-side Parse writes | `src/lib/parse/admin.ts` |
+| `CLOUDINARY_API_KEY` | signed uploads | `src/lib/cloudinary.ts`, `src/app/api/cloudinary/sign/route.ts` |
+| `CLOUDINARY_API_SECRET` | signing uploads | `src/lib/cloudinary.ts` |
+| `NVIDIA_API_KEY` | AI engine | `src/lib/ruddge/engine.ts` |
 
 ```bash
-# Secrets (encrypted, not visible after saving)
 npx wrangler secret put PARSE_MASTER_KEY
-npx wrangler secret put CLOUDINARY_API_SECRET
 npx wrangler secret put CLOUDINARY_API_KEY
+npx wrangler secret put CLOUDINARY_API_SECRET
 npx wrangler secret put NVIDIA_API_KEY
 ```
 
-Plain Worker variables can go in `wrangler.jsonc` under `"vars"`. Do not put secrets there.
+Secrets are not part of the deployed configuration, so they never cause a drift conflict and they survive every deploy.
 
-For `NEXT_PUBLIC_*` values, set them before `yarn deploy` in your shell or `.env.local`, because they are inlined at build time.
+Unused, safe to drop: `PARSE_CLIENT_KEY`, `CLOUDINARY_URL`, `DATABASE_URL` — no code reads them.
 
-## Checklist before `yarn deploy`
+## Fixing the deploy conflict
 
-- [ ] `NEXT_PUBLIC_PARSE_APP_ID`, `NEXT_PUBLIC_PARSE_JS_KEY`, `NEXT_PUBLIC_PARSE_SERVER_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` are set at build time
-- [ ] `PARSE_MASTER_KEY`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `NVIDIA_API_KEY` are stored as Cloudflare secrets
-- [ ] `NEXT_PUBLIC_ENABLE_WATERMARK` is set to `true` or `false` if you want watermarking
-- [ ] Your Parse server allows requests from your Workers domain
+The abort was `wrangler` refusing to overwrite the remote configuration with a different local one. Two differences:
+
+1. **Custom domain** — now declared in `cloudflare.config.ts` as `domains: ["seedessential.eu.cc"]`, matching the remote route.
+2. **Plaintext `vars`** in the dashboard (the Parse and Cloudinary credentials). The config file declares no vars, so every deploy wants to delete them and aborts under `--strict`.
+
+Resolve it once, in the dashboard (Settings → Variables and Secrets):
+
+- **Delete** every plaintext variable: `NEXT_PUBLIC_*`, `PARSE_MASTER_KEY`, `PARSE_CLIENT_KEY`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_URL`.
+- **Recreate the four runtime values above as Secrets.** Secrets are not shown in the drift diff, so the conflict disappears.
+- Do not put the master key or API secret in a `NEXT_PUBLIC_*` name or in `wrangler` vars.
+
+Also remove `wrangler.response-store.jsonc` from the deploy path if it is still configured as the project's build command; the current Worker is a single vinext Worker.
+
+## Rotate the exposed credentials
+
+The Cloudinary API secret, Cloudinary URL, Parse master key and Parse client key were printed in plaintext in the build log (and shared in chat). Treat them as compromised:
+
+1. Roll the Cloudinary API key/secret in the Cloudinary console.
+2. Roll the Parse master key in the Back4App app settings.
+3. Update the local `.env.local`, then `wrangler secret put` the new values.
+4. Keep `.env*` untracked; check git history for any earlier commit of real values.
+
+The Parse application id, JavaScript key and server URL, and the Cloudinary cloud name are public identifiers — they ship to every browser by design. They are not secrets, but the master key and API secret are.
+
+## Checklist before deploying
+
+- [ ] `node_modules` installed and `yarn build:vinext` succeeds locally
+- [ ] `yarn dev:vinext` loads `/en` with no console errors
+- [ ] Plaintext dashboard variables removed; four secrets created
+- [ ] `domains` entry present in `cloudflare.config.ts`
+- [ ] Credentials rotated
+- [ ] After deploy: open `https://seedessential.eu.cc/en`, check the console, then test sign-in, product images, cart and upload

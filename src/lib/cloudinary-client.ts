@@ -2,9 +2,11 @@
  * Client-safe Cloudinary helpers. Only uses the public cloud name — no
  * secrets here, safe to import anywhere (Client or Server Components).
  */
+import { publicEnv } from "@/lib/public-config";
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const WATERMARK_ENABLED = process.env.NEXT_PUBLIC_ENABLE_WATERMARK === "true";
+const CLOUD_NAME = () => publicEnv("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME");
+const WATERMARK_ENABLED = () =>
+  publicEnv("NEXT_PUBLIC_ENABLE_WATERMARK") === "true";
 
 type ImageOptions = {
   width?: number;
@@ -17,8 +19,9 @@ type ImageOptions = {
 
 /** Builds a Cloudinary delivery URL for an image from its public ID. */
 export function cloudinaryImage(publicId: string, opts: ImageOptions = {}) {
-  if (!CLOUD_NAME) {
-    throw new Error("Missing NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in .env.local");
+  const cloudName = CLOUD_NAME();
+  if (!cloudName) {
+    throw new Error("Missing NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME");
   }
   const {
     width,
@@ -42,17 +45,18 @@ export function cloudinaryImage(publicId: string, opts: ImageOptions = {}) {
   // Only add watermark if explicitly enabled in environment and requested
   // The watermark logo should be uploaded to Cloudinary as "tannelli/watermark_logo"
   // Set NEXT_PUBLIC_ENABLE_WATERMARK=true in .env.local to enable
-  const watermarkTransform = (watermark && WATERMARK_ENABLED) 
-    ? "/l_tannelli:watermark_logo,w_120,o_40,g_south_east,x_20,y_20" 
+  const watermarkTransform = (watermark && WATERMARK_ENABLED())
+    ? "/l_tannelli:watermark_logo,w_120,o_40,g_south_east,x_20,y_20"
     : "";
 
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transforms}${watermarkTransform}/${publicId}`;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms}${watermarkTransform}/${publicId}`;
 }
 
 /** Builds a direct Cloudinary URL for a raw file (PDF reports, docs, etc). */
 export function cloudinaryFile(publicId: string) {
-  if (!CLOUD_NAME) {
-    throw new Error("Missing NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in .env.local");
+  const cloudName = CLOUD_NAME();
+  if (!cloudName) {
+    throw new Error("Missing NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME");
   }
-  return `https://res.cloudinary.com/${CLOUD_NAME}/raw/upload/${publicId}`;
+  return `https://res.cloudinary.com/${cloudName}/raw/upload/${publicId}`;
 }

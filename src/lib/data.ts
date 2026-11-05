@@ -68,7 +68,6 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 214,
     tint: "from-neutral-100 to-neutral-200",
-    image: "tannelli/products/monstera-deliciosa",
     short: "The iconic split-leaf statement plant.",
     description:
       "A vigorous, easy-going tropical famous for its dramatic fenestrated leaves. Perfect for bright living rooms and a favourite of first-time plant parents.",
@@ -95,7 +94,6 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 341,
     tint: "from-neutral-100 to-neutral-200",
-    image: "tannelli/products/snake-plant",
     short: "Nearly indestructible low-light survivor.",
     description:
       "Architectural, upright and forgiving — the snake plant thrives on neglect and filters indoor air. Ideal for offices and low-light hallways.",
@@ -122,7 +120,6 @@ export const products: Product[] = [
     rating: 4.7,
     reviews: 96,
     tint: "from-neutral-100 to-neutral-200",
-    image: "tannelli/products/olive-tree",
     short: "Evergreen symbol of warm, dry climates.",
     description:
       "A hardy, drought-tolerant evergreen that brings a Mediterranean feel to terraces and gardens. Produces fruit in warm, sunny positions.",
@@ -149,7 +146,6 @@ export const products: Product[] = [
     rating: 4.6,
     reviews: 512,
     tint: "from-neutral-100 to-neutral-200",
-    image: "tannelli/products/cherry-tomato-seeds",
     short: "Sweet, prolific balcony croppers.",
     description:
       "High-yield cherry tomato seeds ideal for balconies, raised beds and greenhouses. Reliable germination and continuous summer harvests.",
@@ -176,7 +172,6 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 178,
     tint: "from-neutral-100 to-neutral-200",
-    image: "tannelli/products/lavender",
     short: "Fragrant, pollinator-loving classic.",
     description:
       "Aromatic silvery foliage with purple summer spikes that bees adore. Thrives in poor, well-drained soil and full sun.",
@@ -202,7 +197,6 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 265,
     tint: "from-neutral-100 to-neutral-200",
-    image: "tannelli/products/aloe-vera",
     short: "Healing succulent, thrives on neglect.",
     description:
       "A practical, sculptural succulent whose gel soothes minor burns. Loves bright light and infrequent watering.",

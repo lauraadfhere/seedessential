@@ -10,19 +10,20 @@
  * for regular (non-privileged) reads and writes.
  */
 import Parse from "parse";
+import { publicEnv } from "@/lib/public-config";
 
 let initialized = false;
 
 export function getParse(): typeof Parse {
   if (!initialized) {
-    const appId = process.env.NEXT_PUBLIC_PARSE_APP_ID;
-    const jsKey = process.env.NEXT_PUBLIC_PARSE_JS_KEY;
-    const serverURL = process.env.NEXT_PUBLIC_PARSE_SERVER_URL;
+    const appId = publicEnv("NEXT_PUBLIC_PARSE_APP_ID");
+    const jsKey = publicEnv("NEXT_PUBLIC_PARSE_JS_KEY");
+    const serverURL = publicEnv("NEXT_PUBLIC_PARSE_SERVER_URL");
 
     if (!appId || !jsKey || !serverURL) {
       throw new Error(
         "Missing Parse configuration. Set NEXT_PUBLIC_PARSE_APP_ID, " +
-          "NEXT_PUBLIC_PARSE_JS_KEY and NEXT_PUBLIC_PARSE_SERVER_URL in .env.local.",
+          "NEXT_PUBLIC_PARSE_JS_KEY and NEXT_PUBLIC_PARSE_SERVER_URL.",
       );
     }
 
