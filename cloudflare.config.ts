@@ -1,20 +1,7 @@
 import { bindings, defineConfig, defineWorker } from "cf/config";
-import { createWorkersResponseStoreServiceBindingConfig } from "@vinext/cloudflare/cache/config";
-
-const responseStore = await createWorkersResponseStoreServiceBindingConfig({
-  worker: {
-    name: "tannelli-response-store",
-    compatibilityDate: "2026-11-05",
-    compatibilityFlags: ["nodejs_compat"],
-  },
-  bucket: "tannelli-response-store-cache-bodies",
-});
-
-export const responseStoreServiceBinding = responseStore.serviceBindingWorker;
 
 export default defineConfig({
   worker: defineWorker({
-    ...responseStore.applicationWorker,
     name: "seedessential",
     entrypoint: "vinext/server/fetch-handler",
     compatibilityDate: "2026-11-05",
@@ -25,7 +12,6 @@ export default defineConfig({
       runWorkerFirst: ["/*", "!/_next/static/*", "!/*/_next/static/*"],
     },
     env: {
-      ...responseStore.applicationWorker.env,
       ASSETS: bindings.assets(),
       IMAGES: bindings.images(),
     },
