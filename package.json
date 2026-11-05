@@ -11,26 +11,41 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "lint": "eslint",
     "parse:schema": "node --env-file=.env.local scripts/parse-schema.mjs",
-    "test:roles": "node scripts/role-readiness.mjs"
+    "test:roles": "node scripts/role-readiness.mjs",
+    "dev:vinext": "vite dev --port 3001",
+    "build:vinext": "vite build",
+    "start:vinext": "wrangler dev --config dist/server/wrangler.json",
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json --warm-cache",
+    "deploy:response-store": "wrangler deploy --config wrangler.response-store.jsonc"
   },
   "dependencies": {
+    "@cloudflare/workers-response-store": "^1.1.5",
+    "@vinext/cloudflare": "^1.3.3",
     "cloudinary": "^2.11.0",
     "next": "^16.4.1",
     "parse": "^8.6.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "server-only": "^0.0.1"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-server-dom-webpack": "^19.3.1",
+    "server-only": "^0.0.1",
+    "vinext": "^1.4.3"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "2.0.0-beta.v.11",
     "@opennextjs/cloudflare": "1.20.12",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-rsc": "^0.5.38",
+    "cf": "^1.0.0-beta.27",
     "eslint": "^9",
     "eslint-config-next": "^16.4.1",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wrangler": "4.148.0"
-  }
+    "vite": "8.3.0",
+    "wrangler": "^4.156.1"
+  },
+  "type": "module"
 }
