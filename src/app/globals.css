@@ -1,0 +1,449 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --muted: #6b7280;
+  --line: #ececec;
+  --accent: #40533d;
+  --accent-strong: #1f3a1c;
+  --accent-soft: #f4f7f2;
+  --accent-lime: #9ad83a;
+  --surface: #fafafa;
+}
+
+/* A compact 10% reduction keeps dense marketplace and dashboard screens
+   comfortable at a standard 100% browser zoom without changing breakpoints. */
+html {
+  font-size: 90%;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-lime: var(--accent-lime);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --font-sans: var(--font-open-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--line);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Main-page body copy is intentionally high contrast and slightly larger for
+   comfortable reading. Dark panels retain their dedicated light text styles. */
+main > :not(.bg-black):not(.bg-emerald-950) p.text-neutral-400,
+main > :not(.bg-black):not(.bg-emerald-950) p.text-neutral-500,
+main > :not(.bg-black):not(.bg-emerald-950) p.text-neutral-600,
+main > :not(.bg-black):not(.bg-emerald-950) p.text-neutral-700 {
+  color: var(--foreground);
+}
+
+main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
+  font-size: 1.05em;
+}
+
+/* Brand wordmark spacing echoing the reference UI */
+.wordmark {
+  letter-spacing: 0.35em;
+  font-weight: 700;
+}
+
+.tracking-brand {
+  letter-spacing: 0.25em;
+}
+
+/* One typeface across the app: the legacy display/section classes used in
+   components resolve to the same Open Sans loaded in the root layout. */
+.font-simplon {
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Hero “global network” language: lifted circular nodes, soft forest depth. */
+.network-surface {
+  background-color: #f4f7f3;
+  background-image:
+    radial-gradient(circle at 11% 16%, rgb(64 83 61 / 0.09), transparent 24%),
+    radial-gradient(circle at 92% 8%, rgb(64 83 61 / 0.07), transparent 20%),
+    radial-gradient(circle at 78% 88%, rgb(38 59 45 / 0.06), transparent 28%);
+}
+
+.network-card {
+  background: #fff;
+  border: 1px solid rgb(64 83 61 / 0.12);
+  box-shadow:
+    0 18px 50px rgb(24 35 27 / 0.1),
+    0 2px 8px rgb(24 35 27 / 0.04);
+}
+
+.network-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.network-card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgb(158 177 155 / 0.9);
+  box-shadow:
+    0 24px 56px rgb(24 35 27 / 0.14),
+    0 4px 12px rgb(24 35 27 / 0.06);
+}
+
+.network-node {
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.14);
+}
+
+@font-face {
+  font-family: "Haskoy";
+  src: url("/Haskoy-Medium.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Haskoy";
+  src: url("/Haskoy-SemiBold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Haskoy";
+  src: url("/Haskoy-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
+.font-haskoy {
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Section body font (Barlow from /public/NewFont). Hero keeps Simplon/Haskoy. */
+@font-face {
+  font-family: "Barlow";
+  src: url("/NewFont/barlow-v11-latin-regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Barlow";
+  src: url("/NewFont/barlow-v11-latin-600.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Barlow";
+  src: url("/NewFont/barlow-v11-latin-700.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+.font-barlow {
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Bosch Sans font for authentication pages */
+@font-face {
+  font-family: "BoschSans";
+  src: url("/boschsans_regular.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+.font-boschsans {
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Authentication stays deliberately neutral and highly legible. */
+.auth-arial,
+.auth-arial input,
+.auth-arial textarea,
+.auth-arial select,
+.auth-arial button {
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+}
+
+/* IONOS-like section depth: soft lift, light surface, sharp-ish corners */
+.section-surface {
+  background: #f5f6f7;
+}
+
+.section-surface-white {
+  background: #ffffff;
+}
+
+.section-diagonal {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 2.5rem), 0 100%);
+  padding-bottom: 3.5rem;
+}
+
+@media (min-width: 640px) {
+  .section-diagonal {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 3.5rem), 0 100%);
+    padding-bottom: 4.5rem;
+  }
+}
+
+.depth-card {
+  background: #fff;
+  border: 1px solid rgb(15 23 42 / 0.06);
+  border-radius: 0.75rem;
+  box-shadow:
+    0 10px 30px rgb(15 23 42 / 0.08),
+    0 2px 6px rgb(15 23 42 / 0.04);
+}
+
+.depth-card-hover {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.depth-card-hover:hover {
+  border-color: rgb(15 23 42 / 0.1);
+  box-shadow:
+    0 12px 28px rgb(15 23 42 / 0.1),
+    0 2px 6px rgb(15 23 42 / 0.04);
+}
+
+.depth-float {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow:
+    0 16px 40px rgb(15 23 42 / 0.12),
+    0 4px 12px rgb(15 23 42 / 0.06);
+}
+
+.badge-neu {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  background: #d4e666;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+}
+
+.cta-hosting {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  background: #006d44;
+  padding: 0.7rem 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.cta-hosting:hover {
+  background: #005836;
+}
+
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: #1a1a1a;
+}
+
+.check-row::before {
+  content: "✓";
+  flex-shrink: 0;
+  font-weight: 800;
+  color: #0a0a0a;
+  line-height: 1.35;
+}
+
+[dir="rtl"] .tracking-brand,
+[dir="rtl"] .wordmark {
+  letter-spacing: 0;
+}
+
+.section {
+  max-width: 90rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .section {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Subtle rising animation for cards */
+@keyframes grow-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.grow-in {
+  animation: grow-in 0.5s ease both;
+}
+
+@keyframes tannelli-loader-appear {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes tannelli-letter-transition {
+  0% { opacity: 0; transform: translateY(16px) scale(0.9); filter: blur(9px); }
+  32% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  68% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: translateY(-12px) scale(1.06); filter: blur(7px); }
+}
+
+@keyframes tannelli-letter-sheen {
+  0% { transform: translateX(-160%) skewX(-18deg); }
+  100% { transform: translateX(210%) skewX(-18deg); }
+}
+
+.tannelli-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: rgb(255 255 255 / 72%);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  animation: tannelli-loader-appear 180ms ease-out both;
+}
+
+.tannelli-loader-letter {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  color: #62a83d;
+  font-family: var(--font-open-sans), Arial, sans-serif;
+  font-size: clamp(5rem, 13vw, 8rem);
+  font-weight: 900;
+  line-height: 0.8;
+  letter-spacing: -0.12em;
+}
+
+.tannelli-loader-letter > span {
+  display: block;
+  animation: tannelli-letter-transition 1.25s cubic-bezier(.22,.61,.36,1) infinite;
+}
+
+.tannelli-loader-letter::after {
+  position: absolute;
+  inset: -15% auto -15% -55%;
+  width: 28%;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 82%), transparent);
+  animation: tannelli-letter-sheen 1.25s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tannelli-loader, .tannelli-loader-letter > span, .tannelli-loader-letter::after { animation: none; }
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---- Inner-page header: flat text nav like the HOSTBKK template ---- */
+.chrome-nav-link {
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  gap: 0.3rem;
+  padding-inline: 0.7rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: rgb(255 255 255 / 0.95);
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: opacity 140ms ease;
+}
+.chrome-nav-link:hover { opacity: 0.78; }
+.chrome-dropdown { animation: chrome-drop 140ms ease both; }
+@keyframes chrome-drop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* Shared field + card language for inner pages */
+.ui-field {
+  width: 100%;
+  border: 1px solid #dce3d8;
+  background: #fff;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.875rem;
+  color: #18231b;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.ui-field:focus, .ui-field:focus-within {
+  border-color: #40533d;
+  box-shadow: 0 0 0 3px rgb(64 83 61 / 0.14);
+}
+.ui-card {
+  background: #fff;
+  border: 1px solid #e4ebe3;
+  box-shadow: 0 1px 0 rgb(24 35 27 / 0.04), 0 10px 28px rgb(24 35 27 / 0.06);
+}
+
+/* ---- Plant parade (404 + loader): figures marching along a ground line ---- */
+.parade { position: relative; overflow: hidden; }
+.parade-track {
+  display: flex;
+  width: max-content;
+  align-items: flex-end;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  padding-inline: 1rem;
+  animation: parade-march 38s linear infinite;
+}
+[dir="rtl"] .parade-track { animation-direction: reverse; }
+.parade:hover .parade-track { animation-play-state: paused; }
+.parade-figure { flex: none; color: #12382f; transform-origin: 50% 100%; animation: parade-bob 0.9s ease-in-out infinite; }
+.parade-figure:nth-child(3n) { animation-delay: -0.3s; }
+.parade-figure:nth-child(3n + 1) { animation-delay: -0.6s; }
+.parade-leg-a { transform-origin: 50% 0; animation: parade-step 0.9s ease-in-out infinite; }
+.parade-leg-b { transform-origin: 50% 0; animation: parade-step 0.9s ease-in-out infinite reverse; }
+.parade-ground { height: 14px; background: #12382f; }
+@keyframes parade-march { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes parade-bob { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-4px) rotate(1.5deg); } }
+@keyframes parade-step { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(-18deg); } }
+
+@keyframes float-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.float-up { animation: float-up 0.6s cubic-bezier(.22,.61,.36,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .parade-track, .parade-figure, .parade-leg-a, .parade-leg-b, .chrome-dropdown, .float-up { animation: none; }
+}

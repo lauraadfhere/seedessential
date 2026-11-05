@@ -1,0 +1,36 @@
+{
+  "name": "tannelli",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "lint": "eslint",
+    "parse:schema": "node --env-file=.env.local scripts/parse-schema.mjs",
+    "test:roles": "node scripts/role-readiness.mjs"
+  },
+  "dependencies": {
+    "cloudinary": "^2.11.0",
+    "next": "^16.4.1",
+    "parse": "^8.6.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.12",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "^16.4.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "4.148.0"
+  }
+}

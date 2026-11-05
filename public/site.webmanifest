@@ -1,0 +1,13 @@
+{
+  "name": "seed — Plants, equipment & expert solutions",
+  "short_name": "seed",
+  "description": "Agriculture marketplace connecting farmers, growers, experts and equipment merchants.",
+  "start_url": "/en",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#40533d",
+  "icons": [
+    { "src": "/seed.png", "sizes": "any", "type": "image/png", "purpose": "any" },
+    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
