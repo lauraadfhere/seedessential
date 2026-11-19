@@ -30,8 +30,8 @@ function useCatalog(enabled: boolean) {
 function Fact({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
-    <div className="rounded-xl bg-[#f6f8f5] px-4 py-3">
-      <dt className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7d8a7b]">{label}</dt>
+    <div className="border border-rule bg-panel px-4 py-3">
+      <dt className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7d8a7b]">{label}</dt>
       <dd className="mt-1 text-sm font-medium text-[#18231b]">{value}</dd>
     </div>
   );
@@ -56,8 +56,8 @@ function RecommendedProducts({ items, catalog }: { items: RecommendedProduct[]; 
         {items.map((item) => {
           const product = catalog.find((entry) => entry.slug === item.slug);
           return (
-            <div key={item.slug} className="flex gap-3 rounded-2xl border border-[#e3e9e1] bg-white p-3">
-              <Link href={`/shop/${item.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl">
+            <div key={item.slug} className="network-card flex gap-3 p-3">
+              <Link href={`/shop/${item.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden border border-rule bg-panel">
                 {product ? <ProductVisual product={product} className="h-full w-full" /> : <span className="grid h-full place-items-center bg-[#eef3ed] text-xs">{item.name.slice(0, 2)}</span>}
               </Link>
               <div className="flex min-w-0 flex-1 flex-col">
@@ -66,7 +66,7 @@ function RecommendedProducts({ items, catalog }: { items: RecommendedProduct[]; 
                 {item.note && <p className="mt-1 line-clamp-2 text-xs text-[#607060]">“{item.note}”</p>}
                 <div className="mt-auto flex items-center justify-between gap-2 pt-2">
                   {product ? <Price value={product.price} dzd={product.priceDzd} className="text-sm" /> : <span className="text-xs text-[#789078]">Unavailable</span>}
-                  {product && <AddToCartButton product={product} label="Add to cart" className="rounded-lg bg-[#40533d] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white disabled:opacity-40" />}
+                  {product && <AddToCartButton product={product} label="Add to cart" className="bg-[#40533d] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white disabled:opacity-40" />}
                 </div>
               </div>
             </div>
@@ -109,22 +109,22 @@ function RecommendForm({ request, catalog, onSaved }: { request: RequestRecord; 
   }
 
   return (
-    <form onSubmit={submit} className="network-card space-y-5 rounded-[1.5rem] p-6">
+    <form onSubmit={submit} className="network-card space-y-5 p-6">
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#638260]">Your recommendation</p>
         <h2 className="mt-1 text-lg font-semibold">{request.recommendation ? "Update your advice" : "Send your diagnosis and plan"}</h2>
       </div>
       <label className="block text-sm font-semibold">Diagnosis & advice
-        <textarea required minLength={30} value={recommendation} onChange={(e) => setRecommendation(e.target.value)} rows={6} placeholder="What is happening, why, and what the grower should do first." className="mt-2 w-full rounded-xl border border-neutral-300 p-3 text-sm font-normal outline-none focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/20" />
+        <textarea required minLength={30} value={recommendation} onChange={(e) => setRecommendation(e.target.value)} rows={6} placeholder="What is happening, why, and what the grower should do first." className="ui-field mt-2 text-sm font-normal" />
       </label>
       <label className="block text-sm font-semibold">Care / maintenance schedule
-        <textarea value={plan} onChange={(e) => setPlan(e.target.value)} rows={4} placeholder={"Week 1: …\nWeek 2: …"} className="mt-2 w-full rounded-xl border border-neutral-300 p-3 text-sm font-normal outline-none focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/20" />
+        <textarea value={plan} onChange={(e) => setPlan(e.target.value)} rows={4} placeholder={"Week 1: …\nWeek 2: …"} className="ui-field mt-2 text-sm font-normal" />
       </label>
       <label className="block text-sm font-semibold">Estimated budget (DA)
-        <input type="number" min={0} value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-2 w-full rounded-xl border border-neutral-300 p-3 text-sm font-normal" />
+        <input type="number" min={0} value={budget} onChange={(e) => setBudget(e.target.value)} className="ui-field mt-2 text-sm font-normal" />
       </label>
 
-      <div className="rounded-2xl border border-[#dce5dc] bg-[#f7faf6] p-4">
+      <div className="border border-rule bg-panel p-4">
         <p className="text-sm font-semibold">Link products from the marketplace</p>
         <p className="mt-1 text-xs text-[#789078]">The grower can add them to their cart in one tap. Provider equipment is credited to the supplier.</p>
         {picked.length > 0 && (
@@ -132,9 +132,9 @@ function RecommendForm({ request, catalog, onSaved }: { request: RequestRecord; 
             {picked.map((entry) => {
               const product = catalog.find((item) => item.slug === entry.slug);
               return (
-                <li key={entry.slug} className="flex items-center gap-2 rounded-xl bg-white p-2">
+                <li key={entry.slug} className="flex items-center gap-2 border border-rule bg-white p-2">
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold">{product?.name ?? entry.slug}</span>
-                  <input value={entry.note} onChange={(e) => setPicked((all) => all.map((item) => (item.slug === entry.slug ? { ...item, note: e.target.value } : item)))} placeholder="Why / dosage" maxLength={200} className="w-40 rounded-lg border px-2 py-1 text-xs sm:w-56" />
+                  <input value={entry.note} onChange={(e) => setPicked((all) => all.map((item) => (item.slug === entry.slug ? { ...item, note: e.target.value } : item)))} placeholder="Why / dosage" maxLength={200} className="ui-field w-40 !px-2 !py-1 text-xs sm:w-56" />
                   <button type="button" onClick={() => setPicked((all) => all.filter((item) => item.slug !== entry.slug))} className="px-2 text-sm font-bold text-red-600" aria-label="Remove product">×</button>
                 </li>
               );
@@ -144,14 +144,14 @@ function RecommendForm({ request, catalog, onSaved }: { request: RequestRecord; 
         {picked.length < 8 && (
           <>
             <div className="mt-3 flex gap-2">
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search plants, irrigation, soil…" className="min-w-0 flex-1 rounded-lg border bg-white px-3 py-2 text-sm" />
-              <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className="rounded-lg border bg-white px-2 text-sm">
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search plants, irrigation, soil…" className="ui-field min-w-0 flex-1 !py-2 text-sm" />
+              <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className="ui-field !w-auto text-sm">
                 <option value="all">All</option><option value="plant">Plants</option><option value="equipment">Equipment</option>
               </select>
             </div>
             <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
               {results.map((item) => (
-                <button key={item.slug} type="button" onClick={() => setPicked((all) => [...all, { slug: item.slug, note: "" }])} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 text-left text-xs hover:bg-[#eaf0e8]">
+                <button key={item.slug} type="button" onClick={() => setPicked((all) => [...all, { slug: item.slug, note: "" }])} className="flex items-center justify-between gap-2 border border-rule bg-white px-3 py-2 text-left text-xs hover:bg-[#eaf0e8]">
                   <span className="truncate font-semibold">{item.name}</span>
                   <span className="shrink-0 text-[#40533d]">+ Add</span>
                 </button>
@@ -161,7 +161,7 @@ function RecommendForm({ request, catalog, onSaved }: { request: RequestRecord; 
         )}
       </div>
       {error && <Notice tone="error">{error}</Notice>}
-      <button disabled={saving} className="w-full rounded-xl bg-[#40533d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#334532] disabled:opacity-50">{saving ? "Sending…" : request.recommendation ? "Update recommendation" : "Send recommendation"}</button>
+      <button disabled={saving} className="w-full bg-[#40533d] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#334532] disabled:opacity-50">{saving ? "Sending…" : request.recommendation ? "Update recommendation" : "Send recommendation"}</button>
     </form>
   );
 }
@@ -204,23 +204,23 @@ function Thread({ request, messages, setMessages, canWrite, isAdmin }: { request
   }
 
   return (
-    <section className="network-card rounded-[1.5rem] p-6">
+    <section className="network-card p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Conversation</h2>
         <span className="text-xs text-[#789078]">Moderated · contact details hidden</span>
       </div>
       <div className="mt-4 max-h-[28rem] space-y-3 overflow-y-auto pr-1">
-        {!messages.length && <p className="rounded-xl bg-[#f6f8f5] p-4 text-sm text-[#607060]">No messages yet. Ask a question or share an update photo.</p>}
+        {!messages.length && <p className="border border-rule bg-panel p-4 text-sm text-[#607060]">No messages yet. Ask a question or share an update photo.</p>}
         {messages.map((message) => {
           const mine = message.authorId === currentUserId;
           if (message.system) return <p key={message.id} className="text-center text-[11px] font-semibold text-[#789078]">{message.body} · {timeAgo(message.createdAt)}</p>;
           return (
             <div key={message.id} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-              <div className={cn("max-w-[85%] rounded-2xl px-4 py-3", mine ? "bg-[#40533d] text-white" : "bg-[#f1f5ef] text-[#18231b]", message.hidden && "opacity-60")}>
-                <p className={cn("text-[10px] font-bold uppercase tracking-wider", mine ? "text-white/60" : "text-[#7d8a7b]")}>{message.authorName} · {message.authorRole === "expert" ? "Expert" : message.authorRole === "admin" ? "Tannelli" : "Grower"} · {timeAgo(message.createdAt)}</p>
+              <div className={cn("max-w-[85%] border border-rule px-4 py-3", mine ? "bg-[#40533d] text-white" : "bg-panel text-[#18231b]", message.hidden && "opacity-60")}>
+                <p className={cn("text-[11px] font-bold uppercase tracking-wider", mine ? "text-white/60" : "text-[#7d8a7b]")}>{message.authorName} · {message.authorRole === "expert" ? "Expert" : message.authorRole === "admin" ? "Tannelli" : "Grower"} · {timeAgo(message.createdAt)}</p>
                 {message.body && <p className="mt-1 whitespace-pre-wrap text-sm leading-6">{message.body}</p>}
                 {message.attachments.length > 0 && <PhotoGallery photos={message.attachments} className="mt-2 !grid-cols-3" />}
-                <div className="mt-1 flex gap-3 text-[10px] font-bold">
+                <div className="mt-1 flex gap-3 text-[11px] font-bold">
                   {message.flagged && <span className={mine ? "text-amber-200" : "text-amber-700"}>Flagged</span>}
                   {!mine && !isAdmin && <button type="button" onClick={() => moderate(message, "report")} className="text-[#789078] hover:text-red-600">Report</button>}
                   {isAdmin && <button type="button" onClick={() => moderate(message, message.hidden ? "restore" : "hide")} className="text-red-600">{message.hidden ? "Restore" : "Hide"}</button>}
@@ -233,15 +233,15 @@ function Thread({ request, messages, setMessages, canWrite, isAdmin }: { request
       </div>
       {notice && <div className="mt-3"><Notice tone="info">{notice}</Notice></div>}
       {canWrite ? (
-        <form onSubmit={send} className="mt-4 space-y-2 border-t border-[#e6ede5] pt-4">
-          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} maxLength={3000} placeholder="Write a message…" className="w-full rounded-xl border border-neutral-300 p-3 text-sm outline-none focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/20" />
+        <form onSubmit={send} className="mt-4 space-y-2 border-t border-rule pt-4">
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} maxLength={3000} placeholder="Write a message…" className="ui-field text-sm" />
           <div className="flex items-end justify-between gap-3">
             <PhotoPicker value={attachments} onChange={setAttachments} max={4} compact />
-            <button disabled={sending || (!body.trim() && !attachments.length)} className="rounded-xl bg-[#40533d] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40">{sending ? "Sending…" : "Send"}</button>
+            <button disabled={sending || (!body.trim() && !attachments.length)} className="bg-[#40533d] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40">{sending ? "Sending…" : "Send"}</button>
           </div>
         </form>
       ) : (
-        <p className="mt-4 border-t border-[#e6ede5] pt-4 text-xs text-[#789078]">{request.status === "completed" || request.status === "cancelled" ? "This conversation is closed." : "Messaging opens once an expert accepts the request."}</p>
+        <p className="mt-4 border-t border-rule pt-4 text-xs text-[#789078]">{request.status === "completed" || request.status === "cancelled" ? "This conversation is closed." : "Messaging opens once an expert accepts the request."}</p>
       )}
     </section>
   );
@@ -269,7 +269,7 @@ function ActionPanel({ request, onChange }: { request: RequestRecord; onChange: 
   }
 
   const button = (action: string, label: string, variant: "primary" | "outline" | "danger" = "primary", payload?: Record<string, unknown>, message?: string) => (
-    <button key={action} type="button" disabled={Boolean(busy)} onClick={() => run(action, payload, message)} className={cn("w-full rounded-xl px-4 py-3 text-sm font-bold transition disabled:opacity-50", variant === "primary" ? "bg-[#40533d] text-white hover:bg-[#334532]" : variant === "danger" ? "border border-red-200 text-red-700 hover:bg-red-50" : "border border-[#cfdccb] text-[#40533d] hover:bg-[#eaf0e8]")}>
+    <button key={action} type="button" disabled={Boolean(busy)} onClick={() => run(action, payload, message)} className={cn("w-full px-4 py-3 text-sm font-bold transition disabled:opacity-50", variant === "primary" ? "bg-[#40533d] text-white hover:bg-[#334532]" : variant === "danger" ? "border border-red-200 text-red-700 hover:bg-red-50" : "border border-rule text-[#40533d] hover:bg-[#eaf0e8]")}>
       {busy === action ? "Working…" : label}
     </button>
   );
@@ -277,7 +277,7 @@ function ActionPanel({ request, onChange }: { request: RequestRecord; onChange: 
   if (!actions.some((action) => action !== "message" && action !== "recommend")) return null;
 
   return (
-    <div className="network-card space-y-3 rounded-[1.5rem] p-5">
+    <div className="network-card space-y-3 p-5">
       <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#638260]">Next step</p>
       {actions.includes("accept") && (
         <>
@@ -290,13 +290,13 @@ function ActionPanel({ request, onChange }: { request: RequestRecord; onChange: 
         <div className="space-y-3">
           <p className="text-sm text-[#607060]">Happy with the advice? Close the request and rate your expert.</p>
           <StarInput value={rating} onChange={setRating} />
-          <textarea value={review} onChange={(e) => setReview(e.target.value)} rows={3} maxLength={1000} placeholder="Share what helped (optional)" className="w-full rounded-xl border border-neutral-300 p-3 text-sm" />
+          <textarea value={review} onChange={(e) => setReview(e.target.value)} rows={3} maxLength={1000} placeholder="Share what helped (optional)" className="ui-field text-sm" />
           {button("complete", "Mark as solved", "primary", { rating, review }, "Thanks! Your rating helps other growers.")}
         </div>
       )}
       {(actions.includes("approve") || actions.includes("reject")) && (
         <div className="space-y-2">
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Moderation note (shown to the grower)" className="w-full rounded-xl border border-neutral-300 p-3 text-sm" />
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Moderation note (shown to the grower)" className="ui-field text-sm" />
           {actions.includes("approve") && button("approve", "Approve & publish", "primary", { note }, "Request approved and visible to experts.")}
           {actions.includes("reject") && button("reject", "Reject request", "danger", { note }, "Request rejected.")}
         </div>
@@ -365,7 +365,7 @@ function RequestDetail() {
           {request.moderationNote && (request.viewer.isOwner || request.viewer.role === "admin") && <Notice tone={request.status === "rejected" ? "error" : "info"}>Moderation: {request.moderationNote}</Notice>}
           {request.moderationFlags.length > 0 && request.viewer.role === "admin" && <Notice tone="info">Flags: {request.moderationFlags.map((flag) => MODERATION_FLAG_LABELS[flag] ?? flag).join(" · ")}</Notice>}
 
-          <section className="network-card rounded-[1.5rem] p-6">
+          <section className="network-card p-6">
             <h2 className="text-lg font-semibold">The situation</h2>
             <p className="mt-3 whitespace-pre-wrap leading-7 text-[#38463a]">{request.objective}</p>
             <dl className="mt-5 grid gap-2 sm:grid-cols-3">
@@ -382,17 +382,17 @@ function RequestDetail() {
           </section>
 
           {request.recommendation && (
-            <section className="rounded-[1.5rem] border-2 border-[#40533d] bg-white p-6 shadow-[0_18px_40px_rgb(64_83_61_/_0.12)]">
+            <section className="border-2 border-[#40533d] bg-white p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#638260]">Expert recommendation</p>
                   <p className="mt-1 text-sm text-[#607060]">by {request.assignedExpert?.name} · {timeAgo(request.answeredAt)}</p>
                 </div>
-                {request.estimatedBudget > 0 && <span className="rounded-full bg-[#eaf0e8] px-3 py-1.5 text-sm font-semibold">Est. {new Intl.NumberFormat("fr-DZ").format(request.estimatedBudget)} DA</span>}
+                {request.estimatedBudget > 0 && <span className="border border-rule bg-panel px-3 py-1.5 text-sm font-semibold">Est. {new Intl.NumberFormat("fr-DZ").format(request.estimatedBudget)} DA</span>}
               </div>
               <p className="mt-4 whitespace-pre-wrap leading-7">{request.recommendation}</p>
               {request.maintenancePlan && (
-                <div className="mt-5 rounded-xl bg-[#f6f8f5] p-4">
+                <div className="mt-5 border border-rule bg-panel p-4">
                   <p className="text-sm font-semibold">Care schedule</p>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#38463a]">{request.maintenancePlan}</p>
                 </div>
@@ -418,7 +418,7 @@ function RequestDetail() {
         <aside className="space-y-4 lg:sticky lg:top-32 lg:self-start">
           <ActionPanel request={request} onChange={update} />
           {request.assignedExpert ? (
-            <div className="network-card rounded-[1.5rem] p-5">
+            <div className="network-card p-5">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#638260]">Your expert</p>
               <div className="mt-3 flex items-center gap-3">
                 <Avatar src={request.assignedExpert.avatar} name={request.assignedExpert.name} className="h-12 w-12 text-sm" />
@@ -430,26 +430,26 @@ function RequestDetail() {
               <Link href={`/experts/${request.assignedExpert.slug}`} className="mt-4 inline-block text-xs font-bold text-[#40533d]">View profile →</Link>
             </div>
           ) : request.preferredExpert ? (
-            <div className="network-card rounded-[1.5rem] p-5 text-sm">
+            <div className="network-card p-5 text-sm">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#638260]">Requested expert</p>
               <p className="mt-2 font-semibold">{request.preferredExpert.name}</p>
               <p className="mt-1 text-xs text-[#607060]">Waiting for their answer. If they decline, it opens to other matching experts.</p>
             </div>
           ) : (
-            <div className="network-card rounded-[1.5rem] p-5 text-sm text-[#607060]">
+            <div className="network-card p-5 text-sm text-[#607060]">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#638260]">Matching</p>
               <p className="mt-2">{request.status === "submitted" ? "In moderation — usually reviewed within a few hours." : `Visible to verified experts covering ${request.wilaya}${request.mode === "online" ? " and online experts across Algeria" : ""}.`}</p>
             </div>
           )}
           {request.customer && !request.viewer.isOwner && (
-            <div className="network-card rounded-[1.5rem] p-5">
+            <div className="network-card p-5">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#638260]">Grower</p>
               <p className="mt-2 font-semibold">{request.customer.name}</p>
               <p className="text-xs text-[#607060]">{request.customer.accountKind === "farmer" ? "Farmer" : "Home grower"} · {request.wilaya}</p>
             </div>
           )}
           {request.viewer.isOwner && request.status === "answered" && (
-            <Link href="/cart" className="block rounded-[1.5rem] bg-[#263b2d] p-5 text-white">
+            <Link href="/cart" className="block border border-[#40533d] bg-[#263b2d] p-5 text-white">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/60">Ready to act?</p>
               <p className="mt-2 text-sm">Add the recommended products, then check out with delivery to {request.wilaya}.</p>
               <span className="mt-3 inline-block text-sm font-bold underline">Open cart →</span>

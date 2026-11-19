@@ -6,6 +6,7 @@ import { getParse } from "@/lib/parse/client";
 import { useI18n } from "@/lib/i18n";
 import { cloudinaryImage } from "@/lib/cloudinary-client";
 import { ProductVisual } from "@/components/product-card";
+import { SignOutButton } from "@/components/header-parts";
 import { categories, products } from "@/lib/data";
 
 type CatalogItem = {
@@ -37,6 +38,9 @@ const adminCards: AdminCard[] = [
   { key: "moderation", title: "Moderation", text: "Expert requests, conversations, reviews and content safety.", icon: "moderation" },
   { key: "claims", title: "Claims & support", text: "Customer cases, disputes and resolutions.", icon: "claims" },
   { key: "content", title: "Content", text: "Guides, articles, promotions and SEO content.", icon: "content" },
+  { key: "consultations", title: "Consultations", text: "Expert consultations, disputes and expert performance.", icon: "experts" },
+  { key: "configuration", title: "Configuration", text: "Delivery zones, fees, feature flags and templates.", icon: "content" },
+  { key: "audit", title: "Audit log", text: "Administrative actions, role changes and status overrides.", icon: "audit" },
   { key: "analytics", title: "Analytics", text: "Marketplace performance and reporting.", icon: "analytics" },
 ];
 
@@ -58,7 +62,8 @@ function AdminIcon({ name, className = "h-5 w-5" }: { name: string; className?: 
     orders: "M5 7h14v13H5zM8 7V5h8v2M8 11h8M8 15h5",
     payments: "M4 7h16v11H4zM4 11h16M8 15h3",
     moderation: "M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z",
-    claims: "M5 5h14v11H9l-4 3.5V5ZM8 9h8M8 12h5",
+    claims: "M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z M9 12l2 2 4-4",
+    audit: "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 3h6v4H9zM9 12l2 2 3-3M9 17h6",
     content: "M6 4h12v16H6zM9 8h6M9 12h6M9 16h4",
     analytics: "M5 19V10M12 19V5M19 19v-7",
   };
@@ -78,11 +83,11 @@ function AdminShell({ active, onSelect, children }: { active: string; onSelect: 
         onClick={() => (enabled ? onSelect(workspace) : undefined)}
         disabled={!enabled}
         title={title}
-        className={`group relative flex w-full items-center justify-center gap-3 rounded-2xl px-2 py-2.5 text-sm font-semibold transition sm:justify-start sm:px-3 ${
-          selected ? "bg-white text-[#18231b] shadow-[0_14px_36px_rgb(0_0_0_/_0.22)]" : enabled ? "text-white/80 hover:bg-white/8 hover:text-white" : "cursor-default text-white/30"
+        className={`group relative flex w-full items-center justify-center gap-3 px-2 py-2.5 text-sm font-semibold transition sm:justify-start sm:px-3 ${
+          selected ? "bg-white text-[#18231b]" : enabled ? "text-white/80 hover:bg-white/8 hover:text-white" : "cursor-default text-white/30"
         }`}
       >
-        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border ${selected ? "border-[#40533d]/15 bg-[#40533d] text-white shadow-[0_10px_24px_rgb(24_35_27_/_0.28)]" : "border-white/15 bg-white/8"}`}>
+        <span className={`grid h-9 w-9 shrink-0 place-items-center border ${selected ? "border-[#40533d]/15 bg-[#40533d] text-white" : "border-white/15 bg-white/8"}`}>
           <AdminIcon name={icon} className="h-4 w-4" />
         </span>
         <span className="hidden sm:block">{title}</span>
@@ -100,7 +105,7 @@ function AdminShell({ active, onSelect, children }: { active: string; onSelect: 
           <div className="relative flex items-center justify-center gap-3 px-1 sm:justify-start">
             <span className="network-node grid h-11 w-11 place-items-center text-sm font-bold text-[#40533d]">T</span>
             <div className="hidden sm:block">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">Tannelli</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/50">Tannelli</p>
               <p className="text-sm font-bold tracking-[0.16em]">ADMIN</p>
             </div>
           </div>
@@ -108,9 +113,12 @@ function AdminShell({ active, onSelect, children }: { active: string; onSelect: 
             {navItem("overview", "Overview", "analytics")}
             {adminCards.map((card) => navItem(card.key, card.title, card.icon, card.key))}
           </nav>
-          <div className="relative mt-8 hidden border-t border-white/10 pt-5 sm:block">
-            <p className="px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">Workspace</p>
-            <p className="mt-2 px-3 text-xs leading-5 text-white/55">Provider equipment stays hidden until you accept it.</p>
+          <div className="relative mt-8 space-y-3 border-t border-white/10 pt-5">
+            <div className="hidden sm:block">
+              <p className="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-white/40">Workspace</p>
+              <p className="mt-2 px-3 text-xs leading-5 text-white/55">Provider equipment stays hidden until you accept it.</p>
+            </div>
+            <SignOutButton tone="sidebar" className="sm:mx-0" />
           </div>
         </aside>
         <div className="min-w-0 flex-1">{children}</div>
@@ -124,14 +132,14 @@ function Pricing({ item, update }: { item: CatalogItem; update: (payload: Record
   const [dzd, setDzd] = useState(item.priceDzd === undefined ? "" : String(item.priceDzd));
   const [saving, setSaving] = useState(false);
   return (
-    <div className="mt-4 grid grid-cols-[1fr_1fr_auto] gap-2 rounded-2xl bg-[#f6f8f5] p-3">
+    <div className="mt-4 grid grid-cols-[1fr_1fr_auto] gap-2 border border-rule bg-[#f6f8f5] p-3">
       <label className="text-xs font-semibold">
         USD ($)
-        <input aria-label="USD price" type="number" min="0" step="0.01" value={usd} onChange={(e) => setUsd(e.target.value)} className="mt-1 w-full rounded-lg border bg-white px-2 py-1.5 text-sm font-normal" />
+        <input aria-label="USD price" type="number" min="0" step="0.01" value={usd} onChange={(e) => setUsd(e.target.value)} className="ui-field mt-1 !py-1.5 text-sm font-normal" />
       </label>
       <label className="text-xs font-semibold">
         DZD
-        <input aria-label="DZD price" type="number" min="0" step="1" placeholder="Optional" value={dzd} onChange={(e) => setDzd(e.target.value)} className="mt-1 w-full rounded-lg border bg-white px-2 py-1.5 text-sm font-normal" />
+        <input aria-label="DZD price" type="number" min="0" step="1" placeholder="Optional" value={dzd} onChange={(e) => setDzd(e.target.value)} className="ui-field mt-1 !py-1.5 text-sm font-normal" />
       </label>
       <button
         disabled={saving}
@@ -143,7 +151,7 @@ function Pricing({ item, update }: { item: CatalogItem; update: (payload: Record
             setSaving(false);
           }
         }}
-        className="self-end rounded-lg bg-[#40533d] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#30412e]"
+        className="self-end bg-[#40533d] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#30412e]"
       >
         {saving ? "…" : "Save"}
       </button>
@@ -166,7 +174,7 @@ function CatalogCard({ item, uploading, editing, draft, setDraft, setEditing, up
   const editingName = editing === item.slug;
   const status = item.visibilityStatus;
   return (
-    <article className="network-card overflow-hidden rounded-[1.75rem]">
+    <article className="network-card overflow-hidden">
       <div className="grid sm:grid-cols-[10rem_1fr]">
         <div className="aspect-square bg-[#eef3ed]">
           {item.images[0] ? (
@@ -179,12 +187,12 @@ function CatalogCard({ item, uploading, editing, draft, setDraft, setEditing, up
         </div>
         <div className="p-5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${status === "published" ? "bg-emerald-50 text-emerald-800" : status === "pending" ? "bg-amber-50 text-amber-800" : "bg-red-50 text-red-700"}`}>{status}</span>
-            {item.providerName && <span className="text-[10px] font-semibold uppercase tracking-wider text-[#789078]">From {item.providerName}</span>}
+            <span className={`border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${status === "published" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : status === "pending" ? "border-amber-200 bg-amber-50 text-amber-800" : "border-red-200 bg-red-50 text-red-700"}`}>{status}</span>
+            {item.providerName && <span className="text-[11px] font-semibold uppercase tracking-wider text-[#789078]">From {item.providerName}</span>}
           </div>
           <div className="mt-3 flex items-start gap-2">
             {editingName ? (
-              <input value={draft} onChange={(e) => setDraft(e.target.value)} className="min-w-0 flex-1 rounded-lg border px-2 py-1 font-semibold" />
+              <input value={draft} onChange={(e) => setDraft(e.target.value)} className="ui-field min-w-0 flex-1 !py-1 font-semibold" />
             ) : (
               <h2 className="flex-1 font-semibold">{item.name}</h2>
             )}
@@ -204,20 +212,20 @@ function CatalogCard({ item, uploading, editing, draft, setDraft, setEditing, up
           </div>
           <Pricing item={item} update={(payload) => update(item.slug, payload).then(() => onNotice("USD and DZD prices saved."))} />
           {item.kind === "plant" ? (
-            <label className="mt-4 flex cursor-pointer items-center justify-between rounded-xl bg-[#f6f8f5] p-3 text-sm">
+            <label className="mt-4 flex cursor-pointer items-center justify-between border border-rule bg-[#f6f8f5] p-3 text-sm">
               <span>Available for expert requests</span>
               <input type="checkbox" checked={item.availableForExpertRequests} onChange={(e) => update(item.slug, { availableForExpertRequests: e.target.checked }).then(() => onNotice("Availability updated."))} className="h-4 w-4 accent-[#40533d]" />
             </label>
           ) : (
-            <label className="mt-4 flex cursor-pointer items-center justify-between rounded-xl bg-[#f6f8f5] p-3 text-sm">
+            <label className="mt-4 flex cursor-pointer items-center justify-between border border-rule bg-[#f6f8f5] p-3 text-sm">
               <span>Show in Popular equipment</span>
               <input type="checkbox" checked={item.featured} onChange={(e) => update(item.slug, { featured: e.target.checked }).then(() => onNotice("Homepage equipment updated."))} className="h-4 w-4 accent-[#40533d]" />
             </label>
           )}
           {status !== "published" && (
             <div className="mt-3 flex gap-2">
-              <button onClick={() => update(item.slug, { visibilityStatus: "published", featured: item.featured }).then(() => onNotice("Listing is now visible in the shop."))} className="rounded-lg bg-[#40533d] px-3 py-2 text-xs font-bold text-white">Accept & publish</button>
-              {status !== "rejected" && <button onClick={() => update(item.slug, { visibilityStatus: "rejected" }).then(() => onNotice("Listing was kept hidden."))} className="rounded-lg border px-3 py-2 text-xs font-bold text-red-700">Reject</button>}
+              <button onClick={() => update(item.slug, { visibilityStatus: "published", featured: item.featured }).then(() => onNotice("Listing is now visible in the shop."))} className="bg-[#40533d] px-3 py-2 text-xs font-bold text-white">Accept & publish</button>
+              {status !== "rejected" && <button onClick={() => update(item.slug, { visibilityStatus: "rejected" }).then(() => onNotice("Listing was kept hidden."))} className="border border-rule px-3 py-2 text-xs font-bold text-red-700">Reject</button>}
             </div>
           )}
           {status === "published" && item.providerName && (
@@ -227,18 +235,18 @@ function CatalogCard({ item, uploading, editing, draft, setDraft, setEditing, up
             <p className="text-xs font-bold uppercase tracking-wide text-[#789078]">Cloudinary collection · {item.images.length}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {item.images.map((image, index) => (
-                <div key={image} className="group relative h-14 w-14 overflow-hidden rounded-lg border">
+                <div key={image} className="group relative h-14 w-14 overflow-hidden border border-rule">
                   <img src={cloudinaryImage(image, { width: 120, height: 120 })} alt="" className="h-full w-full object-cover" />
-                  {index === 0 && <span className="absolute inset-x-0 bottom-0 bg-black/65 py-0.5 text-center text-[9px] font-bold text-white">COVER</span>}
+                  {index === 0 && <span className="absolute inset-x-0 bottom-0 bg-black/65 py-0.5 text-center text-[11px] font-bold text-white">COVER</span>}
                   <div className="absolute inset-0 hidden place-items-center gap-1 bg-black/60 p-1 group-hover:grid">
-                    <button type="button" onClick={() => update(item.slug, { coverImagePublicId: image }).then(() => onNotice("Cover image updated."))} className="rounded bg-white px-1 py-1 text-[9px] font-bold">{index === 0 ? "Current" : "Cover"}</button>
-                    <button type="button" onClick={() => update(item.slug, { removeImagePublicId: image }).then(() => onNotice("Image removed."))} className="rounded bg-white px-1 py-1 text-[9px] font-bold text-red-700">Remove</button>
+                    <button type="button" onClick={() => update(item.slug, { coverImagePublicId: image }).then(() => onNotice("Cover image updated."))} className="bg-white px-1 py-1 text-[11px] font-bold">{index === 0 ? "Current" : "Cover"}</button>
+                    <button type="button" onClick={() => update(item.slug, { removeImagePublicId: image }).then(() => onNotice("Image removed."))} className="bg-white px-1 py-1 text-[11px] font-bold text-red-700">Remove</button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <label className="mt-4 flex cursor-pointer justify-center rounded-xl border border-dashed border-[#b8c6b6] px-3 py-3 text-sm font-semibold text-[#40533d] transition hover:bg-[#f6f8f5]">
+          <label className="mt-4 flex cursor-pointer justify-center border border-dashed border-[#b8c6b6] px-3 py-3 text-sm font-semibold text-[#40533d] transition hover:bg-[#f6f8f5]">
             {uploading === item.slug ? "Uploading…" : "Add collection image"}
             <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => upload(item.slug, e)} />
           </label>
@@ -388,7 +396,7 @@ export default function AdminPage() {
                 <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Operations hub</h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-[#607060]">Manage catalog approvals, people, expert verification, fulfilment and platform operations from one connected workspace.</p>
               </div>
-              <div className="network-card flex items-center gap-2 rounded-2xl px-4 py-3 text-xs text-[#607060]">
+              <div className="network-card flex items-center gap-2 px-4 py-3 text-xs text-[#607060]">
                 <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgb(16_185_129_/_0.18)]" />
                 {items.filter((item) => item.visibilityStatus === "pending").length} listings awaiting review
               </div>
@@ -399,7 +407,7 @@ export default function AdminPage() {
                 { label: "Flagged messages", value: queue.messages ?? 0, href: "moderation" },
                 { label: "Experts awaiting verification", value: queue.experts ?? 0, href: "experts" },
               ].map((item) => (
-                <button key={item.label} onClick={() => openWorkspace(item.href)} className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition ${item.value ? "border-amber-300 bg-amber-50 text-amber-900" : "border-[#dce5dc] bg-white text-[#607060]"}`}>
+                <button key={item.label} onClick={() => openWorkspace(item.href)} className={`flex items-center justify-between border px-4 py-3 text-left text-sm transition ${item.value ? "border-amber-300 bg-amber-50 text-amber-900" : "border-rule bg-white text-[#607060]"}`}>
                   <span className="font-semibold">{item.label}</span>
                   <span className="text-xl font-semibold">{item.value}</span>
                 </button>
@@ -410,7 +418,7 @@ export default function AdminPage() {
                 <button
                   key={card.key}
                   onClick={() => openWorkspace(card.key)}
-                  className="network-card network-card-hover group rounded-[1.75rem] p-5 text-left"
+                  className="network-card network-card-hover group p-5 text-left"
                 >
                   <div className="flex items-start justify-between">
                     <span className="network-node grid h-12 w-12 place-items-center border border-[#dce5dc] text-[#40533d]">
@@ -447,25 +455,25 @@ export default function AdminPage() {
                   : "Add Tannelli equipment, feature it on the homepage, and accept or reject company submissions before they become visible."}
               </p>
             </div>
-            <div className="rounded-full bg-[#40533d] px-5 py-3 text-xs font-semibold text-white shadow-[0_14px_36px_rgb(64_83_61_/_0.28)]">
+            <div className="border border-[#40533d] bg-[#40533d] px-5 py-3 text-xs font-semibold text-white">
               {visible.length} {workspace}
             </div>
           </div>
-          {notice && <p className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
+          {notice && <p className="mt-6 border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
 
           {workspace === "equipment" && (
-            <form onSubmit={addEquipment} className="network-card mt-8 grid gap-3 rounded-[1.75rem] p-5 sm:grid-cols-2 lg:grid-cols-6">
-              <label className="text-xs font-semibold lg:col-span-2">Name<input required value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
+            <form onSubmit={addEquipment} className="network-card mt-8 grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-6">
+              <label className="text-xs font-semibold lg:col-span-2">Name<input required value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
               <label className="text-xs font-semibold">Category
-                <select value={form.category} onChange={(e) => setForm((current) => ({ ...current, category: e.target.value }))} className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm font-normal">
+                <select value={form.category} onChange={(e) => setForm((current) => ({ ...current, category: e.target.value }))} className="ui-field mt-1 text-sm font-normal">
                   {equipmentCategories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
                 </select>
               </label>
-              <label className="text-xs font-semibold">USD<input required type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
-              <label className="text-xs font-semibold">DZD<input type="number" min="0" value={form.priceDZD} onChange={(e) => setForm((current) => ({ ...current, priceDZD: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
-              <label className="text-xs font-semibold sm:col-span-2 lg:col-span-4">Short description<input value={form.short} onChange={(e) => setForm((current) => ({ ...current, short: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
+              <label className="text-xs font-semibold">USD<input required type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
+              <label className="text-xs font-semibold">DZD<input type="number" min="0" value={form.priceDZD} onChange={(e) => setForm((current) => ({ ...current, priceDZD: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
+              <label className="text-xs font-semibold sm:col-span-2 lg:col-span-4">Short description<input value={form.short} onChange={(e) => setForm((current) => ({ ...current, short: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
               <label className="flex items-center gap-2 text-xs font-semibold lg:col-span-1"><input type="checkbox" checked={form.featured} onChange={(e) => setForm((current) => ({ ...current, featured: e.target.checked }))} className="h-4 w-4 accent-[#40533d]" />Popular</label>
-              <button disabled={creating} className="rounded-lg bg-[#40533d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white lg:col-span-1">{creating ? "Adding…" : "Add equipment"}</button>
+              <button disabled={creating} className="bg-[#40533d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white lg:col-span-1">{creating ? "Adding…" : "Add equipment"}</button>
             </form>
           )}
 

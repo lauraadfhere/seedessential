@@ -99,24 +99,26 @@ function RequestForm() {
         sidePanel={
           <div className="space-y-5">
             {expert && (
-              <div className="rounded-2xl border border-[#dce5dc] bg-[#f7faf6] p-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#638260]">Sent directly to</p>
-                <div className="mt-3 flex items-center gap-3">
-                  <Avatar src={expert.avatar} name={expert.name} />
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{expert.name}</p>
-                    <p className="truncate text-xs text-[#607060]">{expert.professionalCategory}</p>
+              <div className="tmpl-panel">
+                <div className="tmpl-panel-head">Sent directly to</div>
+                <div className="tmpl-panel-body !py-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar src={expert.avatar} name={expert.name} />
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{expert.name}</p>
+                      <p className="truncate text-xs text-[#607060]">{expert.professionalCategory}</p>
+                    </div>
                   </div>
+                  <Link href="/experts/request" className="mt-3 inline-block text-xs font-bold text-[#40533d] underline">Open to all matching experts instead</Link>
                 </div>
-                <Link href="/experts/request" className="mt-3 inline-block text-xs font-bold text-[#40533d] underline">Open to all matching experts instead</Link>
               </div>
             )}
             <div>
               <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#607060]"><span>Request quality</span><span>{completeness}%</span></div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#e3ebe1]"><div className="h-full rounded-full bg-[#40533d] transition-all" style={{ width: `${completeness}%` }} /></div>
+              <div className="mt-2 h-2 overflow-hidden border border-rule bg-panel"><div className="h-full bg-[#40533d] transition-all" style={{ width: `${completeness}%` }} /></div>
               <p className="mt-2 text-xs leading-5 text-[#789078]">Detailed requests with photos get accepted faster and receive more precise advice.</p>
             </div>
-            <div className="rounded-2xl bg-[#40533d] p-6 text-white">
+            <div className="border border-[#40533d] bg-[#40533d] p-6 text-white">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">{t("request.purposeLabel")}</p>
               <h2 className="mt-2 text-xl font-semibold leading-tight">{t("request.purposeTitle")}</h2>
               <div className="mt-5 space-y-4 border-t border-white/15 pt-5">
@@ -176,7 +178,7 @@ function RequestForm() {
                   <p className="mb-2 text-sm font-semibold text-neutral-800">Consultation</p>
                   <div className="grid grid-cols-2 gap-2">
                     {[{ value: "online", label: "Online", note: "Photos, chat & video" }, { value: "onsite", label: "On site", note: "Expert visits you" }].map((item) => (
-                      <button key={item.value} type="button" onClick={() => set("mode")(item.value)} className={cn("rounded-xl border-2 p-3 text-left transition", form.mode === item.value ? "border-[#40533d] bg-[#40533d]/5" : "border-neutral-200 bg-white hover:border-[#40533d]/40")}>
+                      <button key={item.value} type="button" onClick={() => set("mode")(item.value)} className={cn("border-2 p-3 text-left transition", form.mode === item.value ? "border-[#40533d] bg-panel" : "border-rule bg-white hover:border-[#40533d]/40")}>
                         <span className="block text-sm font-semibold">{item.label}</span>
                         <span className="block text-[11px] text-[#789078]">{item.note}</span>
                       </button>
@@ -210,7 +212,7 @@ function RequestForm() {
               </div>
             </fieldset>
 
-            <fieldset className="rounded-2xl border-2 border-dashed border-[#b8c6b6] bg-[#f7faf6] p-5">
+            <fieldset className="border-2 border-dashed border-rule bg-panel p-5">
               <PhotoPicker value={photos} onChange={setPhotos} max={MAX_REQUEST_PHOTOS} label={`${t("request.photos")} (${t("request.optional")})`} hint={t("request.photosHelp")} />
             </fieldset>
 

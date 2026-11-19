@@ -56,7 +56,7 @@ export function buttonClasses({
     base,
     variants[variant],
     shape === "rect"
-      ? cn(rectSizes[size], "rounded-md uppercase tracking-wider font-bold")
+      ? cn(rectSizes[size], "rounded-none uppercase tracking-wider font-bold")
       : cn(sizes[size], "rounded-full"),
     className,
   );
@@ -99,7 +99,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide",
+        "inline-flex items-center gap-1 rounded-none border border-rule px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide",
         tones[tone],
         className,
       )}

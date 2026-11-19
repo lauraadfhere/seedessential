@@ -10,6 +10,7 @@ import { SiteFooter } from "./site-footer";
 import { CookieBanner } from "./cookie-banner";
 import { CartProvider } from "./cart-provider";
 import { CartSidebar } from "./cart-sidebar";
+import { RuddgeChat } from "./ruddge-chat";
 
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "";
@@ -47,6 +48,7 @@ export function AppChrome({ children }: { children: ReactNode }) {
           </svg>
         </button>
       )}
+      {!isAdmin && !isAuth && !isDashboard && <RuddgeChat />}
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </CartProvider>
   );

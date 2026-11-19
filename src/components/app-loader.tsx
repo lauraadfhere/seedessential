@@ -1,7 +1,7 @@
 export function AppLoader() {
   return (
-    <div className="tannelli-loader" role="status" aria-label="Loading Tannelli">
-      <span className="tannelli-loader-letter" aria-hidden="true"><span>T</span></span>
+    <div className="tannelli-loader" role="status" aria-label="Loading">
+      <span className="tannelli-spinner" aria-hidden="true" />
       <span className="sr-only">Loading</span>
     </div>
   );

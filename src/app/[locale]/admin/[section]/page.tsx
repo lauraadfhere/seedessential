@@ -1,5 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminUsersPage } from "@/components/admin-users-page";
+import { AdminClaimsPage } from "@/components/admin-claims-page";
+import { AdminPageBar } from "@/components/header-parts";
 
 const sections: Record<string, { title: string; text: string; actions: string[] }> = {
   users: { title: "User management", text: "Manage customer accounts, roles, profile media, addresses and account support.", actions: ["Search users", "Update roles", "Review profile media"] },
@@ -10,14 +12,19 @@ const sections: Record<string, { title: string; text: string; actions: string[] 
   claims: { title: "Claims & support", text: "Track customer claims, disputes, order issues and support resolutions.", actions: ["Open claims", "Support tickets", "Resolved cases"] },
   content: { title: "Content management", text: "Manage knowledge-center articles, promotions, guides and SEO content.", actions: ["Articles", "Promotions", "SEO review"] },
   analytics: { title: "Analytics & reports", text: "Measure catalog, customer, expert and marketplace performance.", actions: ["Sales report", "Expert activity", "Catalog performance"] },
+  consultations: { title: "Consultations", text: "Monitor expert consultations, handle disputes and review expert performance.", actions: ["Active consultations", "Disputes", "Expert performance"] },
+  configuration: { title: "Configuration", text: "Manage delivery zones, fees, feature flags and notification templates.", actions: ["Delivery zones", "Fees", "Feature flags"] },
+  audit: { title: "Audit log", text: "Review administrative actions, role changes and order status overrides.", actions: ["Activity log", "Role history", "Export"] },
 };
 
 export default async function AdminSection({ params }: PageProps<"/[locale]/admin/[section]">) {
-  const { locale, section } = await params; const data = sections[section]; if (!data) notFound();
+  const { section } = await params; const data = sections[section]; if (!data) notFound();
+  if (section === "users") return <AdminUsersPage />;
+  if (section === "claims") return <AdminClaimsPage />;
   return (
     <main className="network-surface min-h-[70vh] py-12">
       <div className="section">
-        <Link href={`/${locale}/admin`} className="text-sm font-bold text-[#40533d]">← Administration hub</Link>
+        <AdminPageBar />
         <p className="mt-8 text-xs font-bold uppercase tracking-brand text-accent">Administration</p>
         <h1 className="mt-2 text-4xl font-semibold">{data.title}</h1>
         <p className="mt-3 max-w-2xl text-neutral-600">{data.text}</p>
@@ -25,7 +32,7 @@ export default async function AdminSection({ params }: PageProps<"/[locale]/admi
           <span className="pointer-events-none absolute inset-x-8 top-10 hidden h-px bg-[#40533d]/12 sm:block" />
           {data.actions.map((action, index) => (
             <div key={action} className="network-card relative rounded-[1.75rem] p-6 pt-8">
-              <span className="network-node absolute left-6 top-0 grid h-8 w-8 -translate-y-1/2 place-items-center border border-[#dce5dc] text-[10px] font-bold text-[#40533d]">0{index + 1}</span>
+              <span className="network-node absolute left-6 top-0 grid h-8 w-8 -translate-y-1/2 place-items-center border border-[#dce5dc] text-[11px] font-bold text-[#40533d]">0{index + 1}</span>
               <h2 className="mt-2 text-lg font-semibold">{action}</h2>
               <p className="mt-2 text-sm text-neutral-600">Workspace module ready for your administration workflow.</p>
             </div>

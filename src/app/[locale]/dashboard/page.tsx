@@ -6,27 +6,26 @@ import { Link } from "@/components/locale-link";
 import { RequireAuth } from "@/components/require-auth";
 import { Price, cn } from "@/components/ui";
 import { EmptyState, RequestCard, StatCard } from "@/components/marketplace";
-import { useAccount, workspaceFor } from "@/components/header-parts";
+import { SignOutButton, useAccount, workspaceFor } from "@/components/header-parts";
 import { api } from "@/lib/api-client";
 import { audienceLabel, isExpertRole, isProviderRole } from "@/lib/roles";
 import { loadOrders, type SavedOrder } from "@/lib/cart";
 import type { RequestRecord } from "@/lib/marketplace-types";
-import { BagIcon, BookIcon, ChatIcon, CheckIcon, ClockIcon, GridIcon, HeartIcon, LeafMark, PackageIcon, SearchIcon, TruckIcon, UserIcon } from "@/components/icons";
+import { BagIcon, BookIcon, ChatIcon, CheckIcon, ClockIcon, GridIcon, HeartIcon, LeafMark, PackageIcon, TruckIcon, UserIcon } from "@/components/icons";
 
 type NavItem = { label: string; href: string; icon: ComponentType<{ className?: string }>; badge?: number };
 type Stat = { label: string; value: number | string; hint: string; href: string; icon: ComponentType<{ className?: string }> };
 
 const browse = [
-  { label: "Plants", text: "Indoor, garden & orchard", href: "/shop?kind=plant", tint: "from-[#e6efdc] to-[#cfe0c4]" },
-  { label: "Equipment", text: "Irrigation, soil & tools", href: "/shop?kind=equipment", tint: "from-[#e9eef0] to-[#cdd9dd]" },
-  { label: "Experts", text: "Verified across 58 wilayas", href: "/experts", tint: "from-[#f2ece0] to-[#e3d5bb]" },
-  { label: "Planner", text: "Plan beds & seasons", href: "/planner", tint: "from-[#eae6f1] to-[#d6cfe4]" },
+  { label: "Plants", text: "Indoor, garden & orchard", href: "/shop?kind=plant" },
+  { label: "Equipment", text: "Irrigation, soil & tools", href: "/shop?kind=equipment" },
+  { label: "Experts", text: "Verified across 58 wilayas", href: "/experts" },
+  { label: "Planner", text: "Plan beds & seasons", href: "/planner" },
 ];
 
 function DashboardBody() {
   const searchParams = useSearchParams();
   const { account, summary } = useAccount();
-  // RequireAuth mounts this body on the client only, so localStorage is safe here.
   const [orders] = useState<SavedOrder[]>(() => loadOrders());
   const [requests, setRequests] = useState<RequestRecord[] | null>(null);
   const latest = searchParams.get("order");
@@ -37,6 +36,7 @@ function DashboardBody() {
   const grower = !provider && !expert && !admin;
   const workspace = workspaceFor(role);
   const counts = summary?.counts ?? {};
+  const roleLabel = audienceLabel(role, account?.accountKind);
 
   const accountId = account?.id;
   useEffect(() => {
@@ -99,141 +99,172 @@ function DashboardBody() {
           : "Keep your growing plan moving.";
 
   const firstName = (account?.name ?? "Grower").split(" ")[0];
+  const dashTitle = expert ? "Expert workspace" : provider ? "Merchant dashboard" : admin ? "Admin dashboard" : "Grower dashboard";
+  const dashText = expert
+    ? "Inbox, active clients and your public profile."
+    : provider
+      ? "Listings, recommendations and marketplace orders."
+      : admin
+        ? "Moderation, verification and platform health."
+        : "Requests, orders and projects in one place.";
 
   return (
-    <main className="min-h-screen bg-[#fcfdfb] text-[#18231b]">
-      <div className="grid min-h-screen lg:grid-cols-[14.5rem_minmax(0,1fr)_18rem]">
-        <aside className="hidden border-r border-[#e3e9e1] bg-white px-4 py-6 lg:flex lg:flex-col">
-          <Link href="/" className="flex items-center gap-2 px-2 text-lg font-bold tracking-tight text-[#263b2d]"><span className="grid h-8 w-8 place-items-center rounded-lg bg-[#40533d] text-white">T</span>Tannelli</Link>
-          <p className="mt-8 px-2 text-[10px] font-bold uppercase tracking-[.18em] text-[#8a9788]">{audienceLabel(role, account?.accountKind)} workspace</p>
-          <nav className="mt-3 space-y-1">
-            {navigation.map((item, index) => (
-              <Link key={item.label} href={item.href} className={cn("group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition", index === 0 ? "bg-[#eaf0e8] font-semibold text-[#263b2d]" : "text-[#607060] hover:bg-[#f3f7f1] hover:text-[#263b2d]")}>
-                <item.icon className="h-5 w-5" />
-                <span className="flex-1">{item.label}</span>
-                {item.badge ? <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-[#263b2d]">{item.badge}</span> : null}
-              </Link>
-            ))}
+    <main className="min-h-screen bg-panel text-[#0f1111]">
+      <div className="border-b border-rule bg-panel-head px-4 py-1 text-right text-xs text-link">
+        <span className="tmpl-chip mx-2 !normal-case !tracking-normal">{roleLabel}</span>
+        <span className="mx-2">{account?.name ?? "Account"}</span>
+        |<Link href="/profile" className="mx-2 hover:underline">Your account</Link>
+        |<Link href="/help" className="mx-2 hover:underline">Help</Link>
+        |<SignOutButton tone="link" />
+      </div>
+
+      <header className="border-b border-[#17231a] bg-[#263b2d]">
+        <div className="tmpl-rail flex flex-wrap items-center gap-5 py-3.5">
+          <Link href="/" aria-label="seed home" className="flex items-center">
+            <img src="/seed.png" alt="seed" width={1906} height={557} className="h-7 w-auto sm:h-8" />
+          </Link>
+          <nav className="flex flex-1 flex-wrap items-center gap-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="inline-flex items-center gap-2 border border-transparent px-3 py-2 text-sm font-semibold text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                  {item.badge ? <span className="bg-[#ffd814] px-1.5 text-[11px] font-bold text-[#0f1111]">{item.badge}</span> : null}
+                </Link>
+              );
+            })}
           </nav>
-          <div className="mt-auto rounded-2xl bg-[#263b2d] p-4 text-white">
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-white/55">Marketplace</p>
-            <p className="mt-2 text-sm leading-5 text-white/80">Growers, verified experts and equipment providers — connected through every request.</p>
-            <Link href={workspace.cta.href} className="mt-4 inline-flex text-sm font-semibold text-white underline underline-offset-4">{workspace.cta.label}</Link>
+          <SignOutButton className="!border-white/25 !bg-white/10 !text-white hover:!bg-white/20" />
+        </div>
+      </header>
+
+      <section className="tmpl-hero">
+        <div className="tmpl-rail flex flex-wrap items-end justify-between gap-5 py-8 sm:py-10">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/55">{roleLabel}</p>
+            <h1 className="tmpl-hero-title mt-1">{dashTitle}</h1>
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/80">{dashText}</p>
           </div>
-        </aside>
+          <div className="flex flex-wrap gap-2">
+            <Link href={workspace.cta.href} className="bg-white px-4 py-2.5 text-sm font-semibold text-[#263b2d] hover:bg-[#eaf0e8]">
+              {workspace.cta.label}
+            </Link>
+            <Link href={workspace.href} className="border border-white/35 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">
+              {workspace.label}
+            </Link>
+          </div>
+        </div>
+      </section>
 
-        <section className="min-w-0 border-r border-[#e3e9e1]">
-          <header className="flex min-h-20 items-center justify-between gap-3 border-b border-[#e3e9e1] px-5 sm:px-8">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[.16em] text-[#7d8a7b]">Dashboard</p>
-              <h1 className="mt-1 text-xl font-semibold">Welcome back, {firstName}</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href={workspace.cta.href} className="hidden rounded-xl bg-[#40533d] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#334532] sm:inline-flex">{workspace.cta.label}</Link>
-              <Link href="/shop" aria-label="Search the shop" className="grid h-10 w-10 place-items-center rounded-full border border-[#dce5dc] text-[#40533d] transition hover:bg-[#eaf0e8]"><SearchIcon className="h-5 w-5" /></Link>
-            </div>
-          </header>
+      <div className="tmpl-rail pt-4">
+        <div className="tmpl-notice flex items-start gap-3">
+          <span className="font-bold text-link">i</span>
+          <p>Welcome back, {firstName}. {headline}</p>
+        </div>
+      </div>
 
-          <nav className="flex gap-1 overflow-x-auto border-b border-[#e3e9e1] px-4 py-2 lg:hidden">
-            {navigation.map((item) => (
-              <Link key={item.label} href={item.href} className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#dce5dc] px-3 py-1.5 text-xs font-semibold text-[#40533d]">
-                {item.label}{item.badge ? <span className="rounded-full bg-amber-400 px-1.5 text-[10px]">{item.badge}</span> : null}
-              </Link>
+      <section className="min-w-0">
+        <div className="tmpl-rail space-y-6 py-6">
+          {latest && (
+            <div className="tmpl-notice !border-s-ok">
+              <p className="tmpl-chip tmpl-chip-ok">Order placed</p>
+              <p className="mt-2 font-semibold">#{latest} is now in fulfilment.</p>
+            </div>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {stats.map((stat, index) => (
+              <StatCard key={stat.label} {...stat} accent={index === 0 && Number(stat.value) > 0} />
             ))}
-          </nav>
+          </div>
 
-          <div className="mx-auto max-w-4xl space-y-8 px-5 py-8 sm:px-8">
-            {latest && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Order placed</p><p className="mt-1 font-semibold">#{latest} is now in fulfilment.</p></div>}
-
-            <article className="relative overflow-hidden rounded-[1.75rem] bg-[#263b2d] p-7 text-white">
-              <LeafMark className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rotate-12 text-white/5" />
-              <p className="text-xs font-bold uppercase tracking-[.16em] text-white/60">Your next step</p>
-              <h2 className="mt-3 max-w-xl text-2xl font-semibold tracking-tight">{headline}</h2>
-              <p className="mt-3 max-w-xl leading-7 text-white/75">
-                {expert ? "Accept requests, send diagnoses and link the plants and equipment growers need." : provider ? "Experts link your approved equipment in their recommendations — keep listings complete with photos and delivery wilayas." : admin ? "Approve held requests, review flagged conversations and verify new experts." : "Describe your problem with photos, get a verified expert's plan, and order exactly what they recommend."}
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link href={workspace.cta.href} className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[#263b2d] transition hover:bg-[#eaf0e8]">{workspace.cta.label}</Link>
-                <Link href={workspace.href} className="rounded-xl border border-white/30 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">{workspace.label}</Link>
-              </div>
-            </article>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {stats.map((stat, index) => <StatCard key={stat.label} {...stat} accent={index === 0 && Number(stat.value) > 0} />)}
-            </div>
-
-            {!provider && (
-              <section>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">{expert ? "Latest requests for you" : admin ? "Waiting for moderation" : "Your expert requests"}</h2>
-                  <Link href={workspace.href} className="text-sm font-semibold text-[#40533d]">View all</Link>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(16rem,0.8fr)]">
+            {!provider ? (
+              <section className="tmpl-panel">
+                <div className="tmpl-panel-head flex items-center justify-between">
+                  <span>{expert ? "Latest requests for you" : admin ? "Waiting for moderation" : "Your expert requests"}</span>
+                  <Link href={workspace.href} className="text-sm font-semibold text-link">View all</Link>
                 </div>
-                {requests === null ? (
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">{[0, 1].map((key) => <div key={key} className="h-64 animate-pulse rounded-[1.5rem] bg-[#f1f5ef]" />)}</div>
-                ) : requests.length ? (
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">{requests.slice(0, 4).map((request) => <RequestCard key={request.id} request={request} />)}</div>
-                ) : (
-                  <div className="mt-4">
+                <div className="tmpl-panel-body !p-4">
+                  {requests === null ? (
+                    <div className="grid gap-4 sm:grid-cols-2">{[0, 1].map((key) => <div key={key} className="h-56 animate-pulse border border-rule bg-panel" />)}</div>
+                  ) : requests.length ? (
+                    <div className="grid gap-4 sm:grid-cols-2">{requests.slice(0, 4).map((request) => <RequestCard key={request.id} request={request} />)}</div>
+                  ) : (
                     <EmptyState
                       title={expert ? "No open requests yet" : admin ? "Moderation queue is empty" : "No request yet"}
                       text={grower ? "Tell a verified expert what's happening in your garden or farm — with photos — and get a written plan." : undefined}
-                      action={grower ? <Link href="/experts/request" className="rounded-xl bg-[#40533d] px-4 py-2.5 text-sm font-semibold text-white">Ask an expert</Link> : undefined}
+                      action={grower ? <Link href="/experts/request" className="ui-btn">Ask an expert</Link> : undefined}
                     />
-                  </div>
-                )}
+                  )}
+                </div>
               </section>
-            )}
-
-            <section>
-              <h2 className="text-lg font-semibold">Popular on Tannelli</h2>
-              <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {browse.map((tile) => (
-                  <Link key={tile.label} href={tile.href} className={cn("group relative overflow-hidden rounded-2xl bg-gradient-to-br p-4 transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgb(24_35_27_/_0.12)]", tile.tint)}>
-                    <p className="font-semibold">{tile.label}</p>
-                    <p className="mt-1 text-xs text-[#4f5f50]">{tile.text}</p>
-                    <span className="mt-6 inline-block text-xs font-bold uppercase tracking-[.12em] text-[#263b2d] transition group-hover:translate-x-1">Explore →</span>
+            ) : (
+              <section className="tmpl-panel">
+                <div className="tmpl-panel-head">Merchant shortcuts</div>
+                <div className="tmpl-panel-body grid gap-3 sm:grid-cols-2">
+                  <Link href="/provider" className="border border-rule bg-panel p-4 hover:border-[#40533d]">
+                    <p className="font-semibold">Manage listings</p>
+                    <p className="mt-1 text-sm text-[#607060]">Photos, prices and delivery wilayas.</p>
                   </Link>
-                ))}
-              </div>
-            </section>
-
-            {orders.length > 0 && (
-              <section>
-                <div className="flex items-center justify-between"><h2 className="text-lg font-semibold">Recent orders</h2><Link href="/orders" className="text-sm font-semibold text-[#40533d]">View all</Link></div>
-                <div className="mt-4 divide-y divide-[#e3e9e1] rounded-2xl border border-[#e3e9e1] bg-white">
-                  {orders.slice(0, 3).map((order) => (
-                    <Link href={`/orders/${order.id}`} key={order.id} className="flex items-center justify-between gap-4 p-4 hover:bg-[#f5f8f3]">
-                      <div><p className="font-semibold">{order.id}</p><p className="mt-1 text-sm text-[#607060]">To {order.wilaya} · {order.days}</p></div>
-                      <Price value={order.total} dzd={order.totalDzd} />
-                    </Link>
-                  ))}
+                  <Link href="/orders" className="border border-rule bg-panel p-4 hover:border-[#40533d]">
+                    <p className="font-semibold">Track orders</p>
+                    <p className="mt-1 text-sm text-[#607060]">Fulfilment for marketplace sales.</p>
+                  </Link>
                 </div>
               </section>
             )}
-          </div>
-        </section>
 
-        <aside className="hidden bg-[#fcfdfb] px-6 py-8 lg:block">
-          <div className="rounded-2xl border border-[#dce5dc] bg-white p-5">
-            <p className="font-semibold">How it works</p>
-            <ol className="mt-4 space-y-3 text-sm text-[#607060]">
-              {["Grower posts a detailed request with photos", "A verified expert in the wilaya accepts it", "The expert sends a plan and links products", "Grower orders from Tannelli & providers, then rates"].map((step, index) => (
-                <li key={step} className="flex gap-3"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#eaf0e8] text-[11px] font-bold text-[#40533d]">{index + 1}</span>{step}</li>
-              ))}
-            </ol>
+            <aside className="space-y-4">
+              <section className="tmpl-list">
+                <div className="tmpl-list-head">Quick links</div>
+                {browse.map((tile) => (
+                  <Link key={tile.label} href={tile.href} className="tmpl-list-row flex items-center justify-between gap-3 hover:bg-panel">
+                    <span>
+                      <span className="block font-semibold">{tile.label}</span>
+                      <span className="text-xs text-[#607060]">{tile.text}</span>
+                    </span>
+                    <span className="text-xs font-bold text-[#40533d]">Open →</span>
+                  </Link>
+                ))}
+              </section>
+
+              {orders.length > 0 && (
+                <section className="tmpl-list">
+                  <div className="tmpl-list-head flex items-center justify-between">
+                    <span>Recent orders</span>
+                    <Link href="/orders" className="text-sm font-semibold text-link">View all</Link>
+                  </div>
+                  {orders.slice(0, 3).map((order) => (
+                    <Link href={`/orders/${order.id}`} key={order.id} className="tmpl-list-row flex items-center justify-between gap-4 hover:bg-panel">
+                      <div>
+                        <p className="font-semibold">{order.id}</p>
+                        <p className="mt-1 text-sm text-[#607060]">To {order.wilaya} · {order.days}</p>
+                      </div>
+                      <Price value={order.total} dzd={order.totalDzd} />
+                    </Link>
+                  ))}
+                </section>
+              )}
+            </aside>
           </div>
-          <div className="mt-8">
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-[#8a9788]">Grower resources</p>
-            <div className="mt-4 space-y-4">
-              {[{ label: "Seasonal calendar", href: "/seasonal-calendar" }, { label: "Plant care guides", href: "/learn" }, { label: "Delivery information", href: "/delivery" }].map((item) => <Link key={item.label} href={item.href} className="block text-sm font-medium text-[#40533d] hover:underline">{item.label} ↗</Link>)}
-            </div>
-          </div>
-        </aside>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
 
 export default function Dashboard() {
-  return <Suspense fallback={<main className="min-h-screen bg-[#fcfdfb] p-10">Loading dashboard…</main>}><RequireAuth loadingLabel="Opening your dashboard…"><DashboardBody /></RequireAuth></Suspense>;
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-panel p-10 text-sm text-[#607060]">Loading dashboard…</main>}>
+      <RequireAuth loadingLabel="Opening your dashboard…">
+        <DashboardBody />
+      </RequireAuth>
+    </Suspense>
+  );
 }

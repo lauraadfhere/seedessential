@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@/components/locale-link";
 import { useI18n } from "@/lib/i18n";
 import { Button, Monogram, SectionHeading, Stars, initials } from "@/components/ui";
-import { ArrowRightIcon, BagIcon, ChatIcon, LeafMark, SearchIcon } from "@/components/icons";
+import { ArrowRightIcon, BagIcon, ChatIcon, LeafMark, PotIcon, SearchIcon, SproutIcon, ToolsIcon } from "@/components/icons";
 import { ProductCard } from "@/components/product-card";
 import { experts, guides, products, type Product } from "@/lib/data";
 import { mergeLiveCatalog } from "@/lib/catalog";
@@ -193,7 +193,7 @@ export default function Home() {
           <div className="relative z-10 flex min-h-[16rem] items-center justify-center lg:min-h-[19rem]" aria-label="Tannelli startup objectives">
             <div className="relative z-10 grid h-52 w-52 place-items-center rounded-full border border-white/90 bg-white p-9 text-center text-[#18231b] sm:h-60 sm:w-60">
               <div>
-                <span className="block text-[10px] font-bold uppercase tracking-[0.24em] text-[#40533d]">Our purpose</span>
+                <span className="block text-[11px] font-bold uppercase tracking-[0.24em] text-[#40533d]">Our purpose</span>
                 <strong className="mt-3 block text-2xl font-semibold leading-[1.05] tracking-tight sm:text-3xl">Grow better<br />together.</strong>
                 <span className="mx-auto mt-4 block h-px w-10 bg-[#40533d]/40" />
                 <span className="mt-3 block text-xs leading-5 text-[#5f6b60]">Everything you need to grow with confidence.</span>
@@ -201,8 +201,8 @@ export default function Home() {
             </div>
             <span className="pointer-events-none absolute left-[18%] top-1/2 z-0 h-px w-[64%] bg-white/70" />
             <span className="pointer-events-none absolute left-1/2 top-[25%] z-0 h-[50%] w-px rotate-[28deg] bg-white/60" />
-            <div className="absolute right-2 top-2 z-10 grid h-24 w-24 place-items-center rounded-full border border-white/90 bg-white p-4 text-center text-[10px] font-bold uppercase leading-4 tracking-[0.12em] text-[#18231b] sm:right-4 sm:top-4 sm:h-28 sm:w-28">Right plant<br />right place</div>
-            <div className="absolute bottom-0 left-2 z-10 grid h-28 w-28 place-items-center rounded-full border border-white/90 bg-white p-4 text-center text-[10px] font-bold uppercase leading-4 tracking-[0.12em] text-[#18231b] sm:bottom-2 sm:left-4 sm:h-32 sm:w-32">Expert help<br />when it matters</div>
+            <div className="absolute right-2 top-2 z-10 grid h-24 w-24 place-items-center rounded-full border border-white/90 bg-white p-4 text-center text-[11px] font-bold uppercase leading-4 tracking-[0.12em] text-[#18231b] sm:right-4 sm:top-4 sm:h-28 sm:w-28">Right plant<br />right place</div>
+            <div className="absolute bottom-0 left-2 z-10 grid h-28 w-28 place-items-center rounded-full border border-white/90 bg-white p-4 text-center text-[11px] font-bold uppercase leading-4 tracking-[0.12em] text-[#18231b] sm:bottom-2 sm:left-4 sm:h-32 sm:w-32">Expert help<br />when it matters</div>
           </div>
         </div>
         <svg aria-hidden="true" viewBox="0 0 1440 180" preserveAspectRatio="none" className="pointer-events-none absolute inset-x-0 bottom-0 h-20 w-full sm:h-28">
@@ -246,13 +246,23 @@ export default function Home() {
       <section className="border-b border-neutral-200/80 bg-[#f5f6f4]">
         <div className="section grid grid-cols-2 gap-3 py-6 sm:grid-cols-4">
           {localizedCategoryGroups.map((category, index) => {
-            const Icon = [LeafMark, SearchIcon, BagIcon, ChatIcon][index];
-            return <Link key={category.name} href={category.href} className="group relative min-h-[8.75rem] overflow-hidden rounded-xl border border-[#d9e5d7] bg-[#f6faf5] p-4 shadow-[0_6px_18px_rgb(24_35_27_/_0.045)] transition duration-300 hover:-translate-y-1 hover:border-[#8fac8a] hover:bg-white hover:shadow-[0_16px_32px_rgb(24_35_27_/_0.12)]">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#40533d] text-white shadow-[0_5px_12px_rgb(64_83_61_/_0.2)]"><Icon className="h-4 w-4" /></span>
-              <span className="mt-5 block text-sm font-bold tracking-tight text-[#20321f]">{category.name}</span>
-              <span className="mt-2 block max-w-[calc(100%-2.5rem)] truncate rounded-full border border-[#dce8da] bg-white px-2.5 py-1 text-[10px] font-medium text-[#5d705a]">{category.detail}</span>
-              <span className="absolute bottom-4 right-4 grid h-7 w-7 place-items-center rounded-full border border-[#d2e0cf] bg-white text-[#40533d] transition group-hover:border-[#40533d] group-hover:bg-[#40533d] group-hover:text-white"><ArrowRightIcon className="h-3.5 w-3.5" /></span>
-            </Link>;
+            const Icon = [LeafMark, SproutIcon, PotIcon, ToolsIcon][index];
+            return (
+              <Link
+                key={category.name}
+                href={category.href}
+                className="group relative min-h-[9.5rem] overflow-hidden rounded-xl border border-black bg-black p-4 text-white shadow-[0_8px_22px_rgb(0_0_0_/_0.28)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_rgb(0_0_0_/_0.38)] sm:min-h-[10.5rem]"
+              >
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/20 text-white ring-1 ring-white/45">
+                  <Icon className="h-6 w-6 text-white" />
+                </span>
+                <span className="mt-5 block text-base font-bold tracking-tight text-white sm:text-lg">{category.name}</span>
+                <span className="mt-2 block max-w-[calc(100%-2.75rem)] truncate rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/90">{category.detail}</span>
+                <span className="absolute bottom-4 right-4 grid h-8 w-8 place-items-center rounded-full bg-white text-black transition group-hover:translate-x-0.5">
+                  <ArrowRightIcon className="h-4 w-4" />
+                </span>
+              </Link>
+            );
           })}
         </div>
       </section>
@@ -430,7 +440,7 @@ export default function Home() {
           </p>
           <div className="grid w-full max-w-3xl gap-3 text-left sm:grid-cols-3">
             {[LeafMark, ChatIcon, BagIcon].map((Icon, index) => (
-              <div key={finalCards[index][0]} className="depth-card group border-0 bg-white/[0.08] p-4 text-white shadow-none transition hover:bg-white/[0.12]">
+              <div key={finalCards[index][0]} className="group rounded-xl border border-white/15 bg-white/10 p-4 text-white transition hover:bg-white/[0.16]">
                 <span className="grid h-9 w-9 place-items-center rounded-md bg-white/10 text-white transition duration-300 group-hover:bg-[#62a83d]"><Icon className="h-4 w-4" /></span>
                 <h3 className="mt-3 text-sm font-bold">{finalCards[index][0]}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-white/70">{finalCards[index][1]}</p>

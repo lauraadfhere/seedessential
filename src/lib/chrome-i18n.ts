@@ -10,6 +10,7 @@ const en = {
   home: "Home", menu: "Menu", close: "Close", workspace: "Workspace",
   notFoundTitle: "Lost the plot.", notFoundText: "This page wandered off with the plants. It may have moved, or the link is out of date.",
   backHome: "Back to home", browseShop: "Browse the shop", tryInstead: "Try one of these instead",
+  chatOpen: "Ask RuddgeAI", chatTitle: "RuddgeAI chat", chatIntro: "Ask about plant care, diseases or planting. Sign in to keep your chat.", chatPlaceholder: "Describe your plant or question…", chatSend: "Send", chatThinking: "Thinking…", chatSignIn: "Sign in to chat", chatNew: "New chat", chatError: "RuddgeAI is unavailable right now.", chatYou: "You",
 };
 
 export type ChromeText = typeof en;
@@ -24,6 +25,7 @@ const fr: ChromeText = {
   home: "Accueil", menu: "Menu", close: "Fermer", workspace: "Espace",
   notFoundTitle: "Hors des sentiers.", notFoundText: "Cette page est partie avec les plantes. Elle a peut-être été déplacée, ou le lien est obsolète.",
   backHome: "Retour à l'accueil", browseShop: "Voir la boutique", tryInstead: "Essayez plutôt",
+  chatOpen: "Demander à RuddgeAI", chatTitle: "Chat RuddgeAI", chatIntro: "Posez vos questions sur les soins, les maladies ou la plantation. Connectez-vous pour garder votre chat.", chatPlaceholder: "Décrivez votre plante ou votre question…", chatSend: "Envoyer", chatThinking: "Réflexion…", chatSignIn: "Connectez-vous pour discuter", chatNew: "Nouveau chat", chatError: "RuddgeAI est indisponible pour le moment.", chatYou: "Vous",
 };
 
 const ar: ChromeText = {
@@ -36,6 +38,7 @@ const ar: ChromeText = {
   home: "الرئيسية", menu: "القائمة", close: "إغلاق", workspace: "مساحة العمل",
   notFoundTitle: "ضللنا الطريق.", notFoundText: "هذه الصفحة رحلت مع النباتات. ربما نُقلت أو أن الرابط قديم.",
   backHome: "العودة للرئيسية", browseShop: "تصفح المتجر", tryInstead: "جرّب أحد هذه الروابط",
+  chatOpen: "اسأل RuddgeAI", chatTitle: "محادثة RuddgeAI", chatIntro: "اسأل عن العناية بالنباتات أو الأمراض أو الزراعة. سجّل الدخول لحفظ محادثتك.", chatPlaceholder: "صِف نبتتك أو سؤالك…", chatSend: "إرسال", chatThinking: "جارٍ التفكير…", chatSignIn: "سجّل الدخول للمحادثة", chatNew: "محادثة جديدة", chatError: "RuddgeAI غير متاح حالياً.", chatYou: "أنت",
 };
 
 const dictionaries: Record<Locale, ChromeText> = { en, fr, ar };

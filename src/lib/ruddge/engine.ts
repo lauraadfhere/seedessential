@@ -2,12 +2,12 @@ import "server-only";
 
 import { cloudinaryImage } from "@/lib/cloudinary-client";
 
-/** Text reasoning for follow-up chat. Confirmed on the NVIDIA hosted API. */
-const TEXT_MODEL = "nvidia/nemotron-3-super-120b-a12b";
-const TEXT_FALLBACK = "nvidia/nemotron-3.5-lightning-30b-a3b";
-/** Vision model that reads plant photos. Falls back to Llama 3.2 90B vision. */
+/** Text reasoning for follow-up chat. nemotron-3-super-120b returns 404 on this account, so lightning is primary. */
+const TEXT_MODEL = "nvidia/nemotron-3.5-lightning-30b-a3b";
+const TEXT_FALLBACK = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning";
+/** Vision model that reads plant photos. Falls back to nemotron-3.5 super VL. Llama 3.2 90B vision timed out. */
 const VISION_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning";
-const VISION_FALLBACK = "meta/llama-3.2-90b-vision-instruct";
+const VISION_FALLBACK = "nvidia/nemotron-3.5-super-vl-120b-a12b";
 
 const ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 

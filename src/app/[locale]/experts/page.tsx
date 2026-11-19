@@ -7,6 +7,7 @@ import { Button, Stars, cn } from "@/components/ui";
 import { Avatar, EmptyState } from "@/components/marketplace";
 import { TrustBadge } from "@/components/trust";
 import { SearchIcon } from "@/components/icons";
+import { TemplateCrumbs, TemplateHero, TemplatePanel } from "@/components/deep-ui";
 import { algeriaWilayas } from "@/lib/algeria";
 import { consultationTypes } from "@/lib/data";
 import type { ExpertSummary } from "@/lib/marketplace-types";
@@ -66,18 +67,20 @@ function ExpertsDirectory() {
   }, [experts, query, sort, topic]);
 
   return (
-    <main className="network-surface">
-      <section className="section py-8 sm:py-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <p className="max-w-xl text-sm leading-6 text-[#607060]">
-            Verified agronomists, irrigation engineers and plant-care specialists across Algeria — online or on site in their wilayas.
-          </p>
-          <Link href="/experts/request" className="inline-flex shrink-0 items-center justify-center bg-[#40533d] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#334532]">
+    <main className="network-surface pb-16">
+      <TemplateHero
+        title="Expert directory"
+        text="Verified agronomists, irrigation engineers and plant-care specialists across Algeria — online or on site in their wilayas."
+        actions={
+          <Link href="/experts/request" className="inline-flex items-center justify-center bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#40533d] hover:bg-[#f4f7f2]">
             Post a request
           </Link>
-        </div>
+        }
+      />
+      <TemplateCrumbs items={[{ label: "Home", href: "/" }, { label: "Experts" }]} />
 
-        <div className="ui-card mt-6 p-4 sm:p-5">
+      <section className="tmpl-rail pb-10">
+        <TemplatePanel title="Find the right specialist" bodyClassName="!p-4 sm:!p-5">
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_14rem_12rem_auto]">
             <label className="ui-field flex items-center gap-2 !py-0">
               <SearchIcon className="h-4 w-4 text-[#789078]" />
@@ -97,27 +100,27 @@ function ExpertsDirectory() {
               <input type="checkbox" checked={onlineOnly} onChange={(e) => setOnlineOnly(e.target.checked)} className="h-4 w-4 accent-[#40533d]" /> Online
             </label>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="tmpl-filter-bar mt-3 !border-0 !bg-transparent !p-0">
             {topics.map((item) => (
               <button key={item.label} type="button" onClick={() => setTopic(item.value)} className={cn("border px-3.5 py-1.5 text-xs font-semibold transition", topic === item.value ? "border-[#40533d] bg-[#40533d] text-white" : "border-[#dce5dc] bg-white text-[#40533d] hover:border-[#40533d]")}>{item.label}</button>
             ))}
           </div>
-        </div>
+        </TemplatePanel>
 
         <p className="mt-6 text-sm text-[#607060]">{experts === null ? "Loading experts…" : `${visible.length} verified expert${visible.length === 1 ? "" : "s"}${wilaya ? ` covering ${wilaya}` : ""}`}</p>
 
         {experts === null ? (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[0, 1, 2, 3].map((key) => <div key={key} className="ui-card h-64 animate-pulse" />)}</div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[0, 1, 2, 3].map((key) => <div key={key} className="tmpl-panel h-64 animate-pulse" />)}</div>
         ) : visible.length ? (
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {visible.map((expert) => (
-              <article key={expert.id} className="ui-card flex flex-col p-5 transition hover:border-[#40533d]/40">
-                <Link href={`/experts/${expert.slug}`} className="flex-1">
+              <article key={expert.id} className="tmpl-list flex flex-col transition hover:border-[#40533d]/50">
+                <Link href={`/experts/${expert.slug}`} className="flex-1 p-5">
                   <div className="flex items-start justify-between gap-2">
                     <Avatar src={expert.avatar} name={expert.name} className="h-14 w-14 text-base" />
                     <div className="flex flex-col items-end gap-1">
                       <TrustBadge tier={expert.trustTier ?? "new"} score={expert.trustScore} compact />
-                      {expert.online && <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Online</span>}
+                      {expert.online && <span className="tmpl-chip tmpl-chip-ok">Online</span>}
                     </div>
                   </div>
                   <h2 className="mt-4 font-semibold text-[#18231b]">{expert.name}</h2>
@@ -126,7 +129,7 @@ function ExpertsDirectory() {
                   {expert.specialties.length > 0 && <p className="mt-3 line-clamp-2 text-sm text-[#607060]">{expert.specialties.slice(0, 3).join(" · ")}</p>}
                   {expert.coverageWilayas.length > 0 && <p className="mt-2 text-[11px] leading-4 text-[#789078]">Covers {expert.coverageWilayas.slice(0, 3).join(", ")}{expert.coverageWilayas.length > 3 ? ` +${expert.coverageWilayas.length - 3}` : ""}</p>}
                 </Link>
-                <div className="mt-5 flex items-center justify-between border-t border-[#e6ede5] pt-4">
+                <div className="flex items-center justify-between border-t border-rule bg-panel-head px-5 py-3">
                   <span className="text-sm"><Stars rating={expert.rating} /> <span className="text-xs text-[#789078]">({expert.reviewsCount})</span></span>
                   <Link href={`/experts/request?expert=${expert.slug}`} className="bg-[#40533d] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Ask</Link>
                 </div>
@@ -144,14 +147,16 @@ function ExpertsDirectory() {
         )}
       </section>
 
-      <section className="border-y border-[#e4ebe3] bg-white py-12">
-        <div className="section">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#789078]">How growers work with experts</p>
+      <section className="border-y border-rule bg-white py-12">
+        <div className="tmpl-rail">
+          <h2 className="tmpl-section-title">How growers work with experts</h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {consultationTypes.map((c) => (
-              <div className="ui-card p-5" key={c.name}>
-                <h3 className="font-semibold text-[#18231b]">{c.name}</h3>
-                <p className="mt-1 text-sm text-[#607060]">{c.note}</p>
+              <div className="tmpl-panel" key={c.name}>
+                <div className="tmpl-panel-head">{c.name}</div>
+                <div className="tmpl-panel-body !py-4">
+                  <p className="text-sm text-[#607060]">{c.note}</p>
+                </div>
               </div>
             ))}
           </div>

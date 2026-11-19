@@ -12,6 +12,8 @@ import { AccountMenu, NotificationBell, useAccount, type Account } from "./heade
 import { useI18n } from "@/lib/i18n";
 import { chromeText, pageTitle, type ChromeText } from "@/lib/chrome-i18n";
 import { isExpertRole, isProviderRole } from "@/lib/roles";
+import { useSearchHistory } from "@/lib/search-history";
+import type { Product } from "@/lib/data";
 
 type MenuItem = { href: string; label: string };
 type MenuGroup = { key: string; label: string; href?: string; items?: MenuItem[] };
@@ -137,11 +139,53 @@ export function AudienceHeader({ onCartClick }: { onCartClick?: () => void }) {
   const segments = pathname.split("/").filter(Boolean).slice(1);
   const title = pageTitle(segments[0] ?? "", locale);
 
+  const [results, setResults] = useState<{ products: Product[]; experts: { slug?: string; name: string; professionalCategory?: string }[] } | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
+  const { history, remember, forget } = useSearchHistory();
+  const term = query.trim().toLowerCase();
+
+  useEffect(() => {
+    if (!searchOpen || term.length < 2) { setResults(null); setSearching(false); setSearchFailed(false); return; }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setSearching(true);
+      setSearchFailed(false);
+      try {
+        const [productsRes, expertsRes] = await Promise.all([
+          fetch("/api/catalog/products", { signal: controller.signal }),
+          fetch(`/api/experts?q=${encodeURIComponent(term)}`, { signal: controller.signal }),
+        ]);
+        if (!productsRes.ok && !expertsRes.ok) throw new Error("search");
+        const products: Product[] = productsRes.ok ? await productsRes.json() : [];
+        const experts = expertsRes.ok ? await expertsRes.json() : [];
+        setResults({
+          products: products.filter((p) => [p.name, p.short, p.description, p.category].some((v) => v && String(v).toLowerCase().includes(term))).slice(0, 6),
+          experts: experts.slice(0, 4),
+        });
+      } catch {
+        if (!controller.signal.aborted) { setSearchFailed(true); setResults(null); }
+      } finally {
+        if (!controller.signal.aborted) setSearching(false);
+      }
+    }, 250);
+    return () => { controller.abort(); window.clearTimeout(timer); };
+  }, [term, searchOpen]);
+
+  function goTo(href: string, value: string) {
+    remember(value);
+    setSearchOpen(false);
+    setQuery("");
+    router.push(href);
+  }
+
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const term = query.trim();
-    router.push(`/${locale}/shop${term ? `?q=${encodeURIComponent(term)}` : ""}`);
-    setSearchOpen(false);
+    const value = query.trim();
+    if (!value) { setSearchOpen(false); router.push(`/${locale}/shop`); return; }
+    if (results?.products[0]) return goTo(`/${locale}/shop/${results.products[0].slug}`, value);
+    if (results?.experts[0]?.slug) return goTo(`/${locale}/experts/${results.experts[0].slug}`, value);
+    goTo(`/${locale}/shop?q=${encodeURIComponent(value)}`, value);
   }
 
   return (
@@ -254,6 +298,14 @@ export function AudienceHeader({ onCartClick }: { onCartClick?: () => void }) {
             <button type="submit" className="bg-[#40533d] px-5 text-sm font-semibold text-white">{text.search}</button>
             <button type="button" onClick={() => setSearchOpen(false)} aria-label={text.close} className="grid w-12 place-items-center text-[#607060] hover:bg-[#f3f7f1]"><CloseIcon className="h-5 w-5" /></button>
           </form>
+          <div className="mx-auto mt-2 max-w-xl bg-white p-4 shadow-2xl" aria-live="polite">
+            {term.length < 2 && history.length > 0 && <ul className="flex flex-wrap gap-2">{history.map((item) => <li key={item} className="flex items-center rounded-full bg-[#f3f7f1] text-sm"><button type="button" onClick={() => setQuery(item)} className="px-3 py-1 text-[#18231b] hover:text-[#40533d]">{item}</button><button type="button" onClick={() => forget(item)} aria-label={`Remove ${item}`} className="pr-2 text-[#607060] hover:text-[#18231b]">×</button></li>)}</ul>}
+            {term.length >= 2 && searching && <p className="py-3 text-sm text-[#607060]">Searching…</p>}
+            {term.length >= 2 && searchFailed && <p className="py-3 text-sm text-red-600">Search is unavailable right now. Press Enter to browse the shop.</p>}
+            {term.length >= 2 && results && !searching && results.products.length === 0 && results.experts.length === 0 && <p className="py-3 text-sm text-[#607060]">No products or experts match “{query.trim()}”. Press Enter to search the shop.</p>}
+            {term.length >= 2 && results && !searching && results.products.length > 0 && <div><p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#607060]">Products</p><ul>{results.products.map((p) => <li key={p.slug}><button type="button" onClick={() => goTo(`/${locale}/shop/${p.slug}`, query)} className="flex w-full items-center justify-between gap-3 px-2 py-2 text-left text-sm hover:bg-[#f3f7f1]"><span className="font-semibold text-[#18231b]">{p.name}</span><span className="truncate text-xs text-[#607060]">{p.short}</span></button></li>)}</ul></div>}
+            {term.length >= 2 && results && !searching && results.experts.length > 0 && <div className="mt-3"><p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#607060]">Experts</p><ul>{results.experts.map((e) => <li key={e.slug ?? e.name}><button type="button" disabled={!e.slug} onClick={() => e.slug && goTo(`/${locale}/experts/${e.slug}`, query)} className="flex w-full items-center justify-between gap-3 px-2 py-2 text-left text-sm hover:bg-[#f3f7f1] disabled:opacity-60"><span className="font-semibold text-[#18231b]">{e.name}</span><span className="truncate text-xs text-[#607060]">{e.professionalCategory}</span></button></li>)}</ul></div>}
+          </div>
         </div>
       )}
     </>

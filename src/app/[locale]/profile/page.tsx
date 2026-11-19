@@ -8,6 +8,7 @@ import { Avatar, Notice } from "@/components/marketplace";
 import { CompletenessMeter, TrustBreakdown } from "@/components/trust";
 import { DocumentUploader } from "@/components/document-uploader";
 import { cn } from "@/components/ui";
+import { useI18n } from "@/lib/i18n";
 import { api, uploadToCloudinary } from "@/lib/api-client";
 import { algeriaWilayas } from "@/lib/algeria";
 import { audienceLabel } from "@/lib/roles";
@@ -41,7 +42,7 @@ function draftFrom(me: AccountProfile): Draft {
   };
 }
 
-const input = "mt-1.5 w-full rounded-xl border border-[#dce5dc] bg-white px-3 py-2.5 text-sm font-normal outline-none transition focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/10";
+const input = "mt-1.5 ui-field";
 
 function Field({ label, hint, children, wide }: { label: string; hint?: string; children: ReactNode; wide?: boolean }) {
   return (
@@ -55,23 +56,24 @@ function Field({ label, hint, children, wide }: { label: string; hint?: string; 
 
 function Section({ title, text, children, aside }: { title: string; text?: string; children: ReactNode; aside?: ReactNode }) {
   return (
-    <section className="rounded-[1.5rem] border border-[#e3e9e1] bg-white p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <section className="tmpl-panel">
+      <div className="tmpl-panel-head flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {text && <p className="mt-1 text-sm text-[#607060]">{text}</p>}
+          <h2 className="text-sm font-semibold">{title}</h2>
+          {text && <p className="mt-1 text-xs font-normal text-[#607060]">{text}</p>}
         </div>
         {aside}
       </div>
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">{children}</div>
+      <div className="tmpl-panel-body grid gap-4 sm:grid-cols-2">{children}</div>
     </section>
   );
 }
 
 function WilayaSelect({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { t } = useI18n();
   return (
     <select value={value} onChange={(event) => onChange(event.target.value)} className={input}>
-      <option value="">Select a wilaya</option>
+      <option value="">{t("profile.selectWilaya")}</option>
       {algeriaWilayas.map((item) => <option key={item.code} value={item.name}>{item.code} · {item.name}</option>)}
     </select>
   );
@@ -83,7 +85,7 @@ function Chips({ options, value, onChange }: { options: string[]; value: string[
       {options.map((option) => {
         const active = value.includes(option);
         return (
-          <button key={option} type="button" onClick={() => onChange(active ? value.filter((item) => item !== option) : [...value, option])} className={cn("rounded-full border px-3 py-1.5 text-xs font-semibold transition", active ? "border-[#40533d] bg-[#40533d] text-white" : "border-[#dce5dc] bg-white text-[#40533d] hover:border-[#40533d]")}>
+          <button key={option} type="button" onClick={() => onChange(active ? value.filter((item) => item !== option) : [...value, option])} className={cn("tmpl-chip", active ? "!border-[#40533d] !bg-[#40533d] !text-white" : "hover:!border-[#40533d]")}>
             {option}
           </button>
         );
@@ -93,18 +95,24 @@ function Chips({ options, value, onChange }: { options: string[]; value: string[
 }
 
 const VERIFICATION_COPY: Record<BusinessProfile["verificationStatus"], { label: string; tone: string; text: string }> = {
-  unverified: { label: "Not verified", tone: "bg-neutral-100 text-neutral-700", text: "Upload your trade registry extract (RC) or tax card so we can verify your business." },
-  pending: { label: "Under review", tone: "bg-amber-100 text-amber-900", text: "An administrator is reviewing your documents." },
-  verified: { label: "Verified business", tone: "bg-emerald-100 text-emerald-900", text: "Your listings show a verified seller badge and rank higher." },
-  rejected: { label: "Verification rejected", tone: "bg-red-100 text-red-800", text: "Update your documents and save to resubmit." },
+  unverified: { label: "Not verified", tone: "tmpl-chip", text: "Upload your trade registry extract (RC) or tax card so we can verify your business." },
+  pending: { label: "Under review", tone: "tmpl-chip tmpl-chip-alert", text: "An administrator is reviewing your documents." },
+  verified: { label: "Verified business", tone: "tmpl-chip tmpl-chip-ok", text: "Your listings show a verified seller badge and rank higher." },
+  rejected: { label: "Verification rejected", tone: "tmpl-chip tmpl-chip-alert", text: "Update your documents and save to resubmit." },
 };
 
+function ProfileLoading() {
+  const { t } = useI18n();
+  return <main className="section py-16 text-sm text-[#607060]">{t("profile.loading")}</main>;
+}
+
 function ProfileBody() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const [me, setMe] = useState<AccountProfile | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState(searchParams.get("welcome") ? "Welcome to Tannelli! Complete your profile so experts and sellers can serve you better." : "");
+  const [notice, setNotice] = useState(searchParams.get("welcome") ? t("profile.welcome") : "");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState("");
 
@@ -118,7 +126,7 @@ function ProfileBody() {
   }, []);
 
   if (error && !me) return <main className="section py-16"><Notice tone="error">{error}</Notice></main>;
-  if (!me || !draft) return <main className="section py-16 text-sm text-[#607060]">Loading your profile…</main>;
+  if (!me || !draft) return <ProfileLoading />;
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((current) => (current ? { ...current, [key]: value } : current));
   const setBusiness = <K extends keyof BusinessProfile>(key: K, value: BusinessProfile[K]) =>
@@ -132,10 +140,12 @@ function ProfileBody() {
     setError("");
     try {
       const { publicId } = await uploadToCloudinary(file, target === "logo" ? "businessDocuments" : "profiles");
-      if (target === "avatar") set("avatar", publicId);
-      else setBusiness("logo", publicId);
+      if (target === "avatar") {
+        set("avatar", publicId);
+        setNotice(t("profile.photoUploaded"));
+      } else setBusiness("logo", publicId);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Upload failed");
+      setError(reason instanceof Error ? reason.message : t("profile.uploadFailed"));
     } finally {
       setUploading("");
     }
@@ -165,10 +175,10 @@ function ProfileBody() {
       });
       setMe(saved);
       setDraft(draftFrom(saved));
-      setNotice(saved.notice || "Profile saved.");
+      setNotice(saved.notice || t("profile.saved"));
       window.dispatchEvent(new Event("tannelli:auth"));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not save");
+      setError(reason instanceof Error ? reason.message : t("profile.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -181,21 +191,24 @@ function ProfileBody() {
     <main className="network-surface min-h-screen py-10">
       <form onSubmit={save} className="section grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <aside className="space-y-4 lg:sticky lg:top-32 lg:self-start">
-          <section className="rounded-[1.5rem] border border-[#e3e9e1] bg-white p-6 text-center">
-            <div className="relative mx-auto w-fit">
-              <Avatar src={draft.avatar} name={draft.name} className="h-24 w-24 text-2xl" />
-              <label className="absolute -bottom-1 -right-1 grid h-9 w-9 cursor-pointer place-items-center rounded-full bg-[#40533d] text-white shadow-lg" title="Change photo">
-                {uploading === "avatar" ? "…" : "✎"}
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => upload(event, "avatar")} />
-              </label>
+          <section className="tmpl-panel text-center">
+            <div className="tmpl-panel-body">
+              <div className="relative mx-auto w-fit">
+                <Avatar src={draft.avatar} name={draft.name} className="h-24 w-24 text-2xl" />
+                <label className="absolute -bottom-1 -right-1 grid h-9 w-9 cursor-pointer place-items-center rounded-full bg-[#40533d] text-white" title={t("profile.photoChange")} aria-label={t("profile.photoChange")}>
+                  {uploading === "avatar" ? <span className="tannelli-spinner h-4 w-4 border-2" aria-hidden="true" /> : "✎"}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => upload(event, "avatar")} />
+                </label>
+              </div>
+              <h1 className="mt-4 text-xl font-semibold">{me.name || "Your profile"}</h1>
+              <p className="mt-1 text-sm text-[#607060]">{me.email}</p>
+              <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                <span className="tmpl-chip">{audienceLabel(me.role, me.accountKind)}</span>
+                {me.status === "pending" && <span className="tmpl-chip tmpl-chip-alert">Pending verification</span>}
+              </div>
+              {draft.avatar && <button type="button" onClick={() => set("avatar", "")} className="mt-2 text-xs font-semibold text-red-700 hover:underline">{t("profile.photoRemove")}</button>}
+              <p className="mt-3 text-xs text-[#789078]">{t("profile.memberSince")} {new Date(me.createdAt).toLocaleDateString()}</p>
             </div>
-            <h1 className="mt-4 text-xl font-semibold">{me.name || "Your profile"}</h1>
-            <p className="mt-1 text-sm text-[#607060]">{me.email}</p>
-            <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-              <span className="rounded-full bg-[#eaf0e8] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#40533d]">{audienceLabel(me.role, me.accountKind)}</span>
-              {me.status === "pending" && <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-900">Pending verification</span>}
-            </div>
-            <p className="mt-3 text-xs text-[#789078]">Member since {new Date(me.createdAt).toLocaleDateString()}</p>
           </section>
           <CompletenessMeter completeness={me.completeness} />
           {me.trust && <TrustBreakdown score={me.trust.score} tier={me.trust.tier} signals={me.trust.signals} penalties={me.trust.penalties} title={me.role === "provider" ? "Seller trust" : "Expert trust"} />}
@@ -208,54 +221,56 @@ function ProfileBody() {
           {notice && <Notice>{notice}</Notice>}
           {error && <Notice tone="error">{error}</Notice>}
 
-          <Section title={me.role === "provider" ? "Account contact" : "About you"} text="Visible to the people you work with on Tannelli.">
-            <Field label="Full name"><input required value={draft.name} onChange={(event) => set("name", event.target.value)} className={input} autoComplete="name" /></Field>
-            <Field label="Phone" hint="Shared only with matched experts and sellers for delivery."><input value={draft.phone} onChange={(event) => set("phone", event.target.value)} className={input} placeholder="+213 5xx xx xx xx" autoComplete="tel" /></Field>
-            <Field label="Home wilaya"><WilayaSelect value={draft.wilaya} onChange={(value) => set("wilaya", value)} /></Field>
-            <Field label="Email"><input value={me.email} disabled className={cn(input, "bg-[#f6f8f5] text-[#789078]")} /></Field>
+          <Section title={me.role === "provider" ? t("profile.accountContact") : t("profile.aboutYou")} text={t("profile.aboutYouText")}>
+            <Field label={t("profile.fullName")}><input required value={draft.name} onChange={(event) => set("name", event.target.value)} className={input} autoComplete="name" /></Field>
+            <Field label={t("profile.phone")} hint={t("profile.phoneHint")}><input value={draft.phone} onChange={(event) => set("phone", event.target.value)} className={input} placeholder="+213 5xx xx xx xx" autoComplete="tel" /></Field>
+            <Field label={t("profile.wilaya")}><WilayaSelect value={draft.wilaya} onChange={(value) => set("wilaya", value)} /></Field>
+            <Field label={t("profile.email")}><input value={me.email} disabled className={cn(input, "bg-[#f6f8f5] text-[#789078]")} /></Field>
             {me.role !== "provider" && (
-              <Field label={me.accountKind === "farmer" ? "About your farm" : "About you"} wide>
+              <Field label={me.accountKind === "farmer" ? t("profile.aboutFarm") : t("profile.aboutYou")} wide>
                 <textarea rows={3} value={draft.bio} onChange={(event) => set("bio", event.target.value)} className={input} placeholder={me.accountKind === "farmer" ? "What you grow, irrigation, soil, challenges…" : "What you like to grow and where…"} />
               </Field>
             )}
           </Section>
 
           {me.role === "customer" && me.accountKind === "farmer" && (
-            <Section title="Your farm" text="Experts use this to tailor recommendations and RuddgeAI uses it as context.">
-              <Field label="Farm or plot size" hint="e.g. 2 ha, 500 m², 3 greenhouses"><input value={draft.farmSize} onChange={(event) => set("farmSize", event.target.value)} className={input} /></Field>
-              <Field label="Main crops" hint="Separate with commas"><input value={draft.mainCrops} onChange={(event) => set("mainCrops", event.target.value)} className={input} placeholder="Tomatoes, olives, dates" /></Field>
+            <Section title={t("profile.yourFarm")} text={t("profile.yourFarmText")}>
+              <Field label={t("profile.farmSize")} hint={t("profile.farmSizeHint")}><input value={draft.farmSize} onChange={(event) => set("farmSize", event.target.value)} className={input} /></Field>
+              <Field label={t("profile.mainCrops")} hint={t("profile.separateCommas")}><input value={draft.mainCrops} onChange={(event) => set("mainCrops", event.target.value)} className={input} placeholder="Tomatoes, olives, dates" /></Field>
             </Section>
           )}
 
           {me.role === "customer" && me.accountKind !== "farmer" && (
-            <Section title="Your growing space">
-              <Field label="Type of space"><select value={draft.gardenType} onChange={(event) => set("gardenType", event.target.value)} className={input}><option value="">Choose…</option>{GARDEN_TYPES.map((item) => <option key={item}>{item}</option>)}</select></Field>
-              <div className="sm:col-span-2"><p className="text-sm font-semibold">Interests</p><Chips options={GROWING_INTERESTS} value={draft.interests} onChange={(value) => set("interests", value)} /></div>
+            <Section title={t("profile.growingSpace")}>
+              <Field label={t("profile.spaceType")}><select value={draft.gardenType} onChange={(event) => set("gardenType", event.target.value)} className={input}><option value="">{t("profile.choose")}</option>{GARDEN_TYPES.map((item) => <option key={item}>{item}</option>)}</select></Field>
+              <div className="sm:col-span-2"><p className="text-sm font-semibold">{t("profile.interests")}</p><Chips options={GROWING_INTERESTS} value={draft.interests} onChange={(value) => set("interests", value)} /></div>
             </Section>
           )}
 
           {me.role === "expert" && me.expert && (
-            <section className="rounded-[1.5rem] border border-[#e3e9e1] bg-white p-6">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+            <section className="tmpl-panel">
+              <div className="tmpl-panel-head flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold">Professional profile</h2>
-                  <p className="mt-1 text-sm text-[#607060]">{me.expert.professionalCategory || "Add your expertise"} · {me.expert.specialties.length} specialties · {me.expert.coverageWilayas.length || "No"} coverage wilayas</p>
+                  <h2 className="text-sm font-semibold">{t("profile.professional")}</h2>
+                  <p className="mt-1 text-xs font-normal text-[#607060]">{me.expert.professionalCategory || t("profile.addExpertise")} · {me.expert.specialties.length} {t("profile.specialties")} · {me.expert.coverageWilayas.length || t("profile.noneCoverage")} {t("profile.coverageWilayas")}</p>
                 </div>
-                <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider", me.expert.status === "active" ? "bg-emerald-100 text-emerald-900" : me.expert.status === "rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-900")}>{me.expert.status === "active" ? "Verified" : me.expert.status}</span>
+                <span className={cn("tmpl-chip", me.expert.status === "active" ? "tmpl-chip-ok" : "tmpl-chip-alert")}>{me.expert.status === "active" ? t("profile.verified") : me.expert.status}</span>
               </div>
-              <p className="mt-4 text-sm leading-6 text-[#607060]">Bio, specialties, coverage, languages and pricing are edited in your Expert studio and appear in the public directory.</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Link href="/expert?tab=profile" className="rounded-full bg-[#40533d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white">Edit in Expert studio</Link>
-                {me.expert.status === "active" && <Link href={`/experts/${me.expert.slug}`} className="rounded-full border border-[#dce5dc] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#40533d]">View public profile</Link>}
+              <div className="tmpl-panel-body">
+                <p className="text-sm leading-6 text-[#607060]">{t("profile.expertBody")}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link href="/expert?tab=profile" className="ui-btn !px-4 !py-2 !text-xs uppercase tracking-wider">{t("profile.editStudio")}</Link>
+                  {me.expert.status === "active" && <Link href={`/experts/${me.expert.slug}`} className="ui-btn ui-btn-outline !px-4 !py-2 !text-xs uppercase tracking-wider">{t("profile.viewPublic")}</Link>}
+                </div>
               </div>
             </section>
           )}
 
           {me.role === "provider" && business && verification && (
             <>
-              <Section title="Company" text="Shown on your listings and seller page." aside={<span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider", verification.tone)}>{verification.label}</span>}>
+              <Section title="Company" text="Shown on your listings and seller page." aside={<span className={verification.tone}>{verification.label}</span>}>
                 <div className="flex items-center gap-4 sm:col-span-2">
-                  <Avatar src={business.logo || draft.avatar} name={business.companyName} className="h-16 w-16 rounded-2xl text-lg" />
+                  <Avatar src={business.logo || draft.avatar} name={business.companyName} className="h-16 w-16 text-lg" />
                   <label className="cursor-pointer text-sm font-bold text-[#40533d]">
                     {uploading === "logo" ? "Uploading…" : business.logo ? "Change logo" : "Upload logo"}
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => upload(event, "logo")} />
@@ -272,26 +287,28 @@ function ProfileBody() {
                 <Field label="Description" hint="What you sell, brands, after-sales service. 60+ characters." wide><textarea rows={4} value={business.description} onChange={(event) => setBusiness("description", event.target.value)} className={input} /></Field>
                 <div className="sm:col-span-2">
                   <div className="flex items-baseline justify-between"><p className="text-sm font-semibold">Delivery coverage</p><span className="text-xs text-[#789078]">{business.coverageWilayas.length} selected</span></div>
-                  <div className="mt-2 flex max-h-44 flex-wrap gap-1.5 overflow-y-auto rounded-xl border border-[#e3e9e1] p-2">
+                  <div className="mt-2 flex max-h-44 flex-wrap gap-1.5 overflow-y-auto border border-rule bg-panel p-2">
                     {algeriaWilayas.map((item) => {
                       const active = business.coverageWilayas.includes(item.name);
-                      return <button key={item.code} type="button" onClick={() => setBusiness("coverageWilayas", active ? business.coverageWilayas.filter((name) => name !== item.name) : [...business.coverageWilayas, item.name])} className={cn("rounded-full px-2.5 py-1 text-[11px] font-semibold", active ? "bg-[#40533d] text-white" : "bg-[#f3f6f2] text-[#40533d]")}>{item.name}</button>;
+                      return <button key={item.code} type="button" onClick={() => setBusiness("coverageWilayas", active ? business.coverageWilayas.filter((name) => name !== item.name) : [...business.coverageWilayas, item.name])} className={cn("tmpl-chip", active ? "!border-[#40533d] !bg-[#40533d] !text-white" : "")}>{item.name}</button>;
                     })}
                   </div>
                 </div>
               </Section>
-              <section className="rounded-[1.5rem] border border-[#e3e9e1] bg-white p-6">
-                <h2 className="text-lg font-semibold">Business verification</h2>
-                <p className="mt-1 text-sm text-[#607060]">{verification.text}</p>
-                {business.rejectionReason && business.verificationStatus === "rejected" && <p className="mt-2 text-sm text-red-700">Reason: {business.rejectionReason}</p>}
-                <DocumentUploader className="mt-4" label="Documents" description="Trade registry extract, tax card or agricultural approval (PDF, JPG, PNG)." folder="businessDocuments" value={business.verificationDocuments.map((doc) => ({ ...doc, size: 0 }))} onChange={(docs) => setBusiness("verificationDocuments", docs.map(({ name, url, publicId, type }) => ({ name, url, publicId, type })))} maxFiles={6} />
+              <section className="tmpl-panel">
+                <div className="tmpl-panel-head">Business verification</div>
+                <div className="tmpl-panel-body">
+                  <p className="text-sm text-[#607060]">{verification.text}</p>
+                  {business.rejectionReason && business.verificationStatus === "rejected" && <p className="mt-2 text-sm text-red-700">Reason: {business.rejectionReason}</p>}
+                  <DocumentUploader className="mt-4" label="Documents" description="Trade registry extract, tax card or agricultural approval (PDF, JPG, PNG)." folder="businessDocuments" value={business.verificationDocuments.map((doc) => ({ ...doc, size: 0 }))} onChange={(docs) => setBusiness("verificationDocuments", docs.map(({ name, url, publicId, type }) => ({ name, url, publicId, type })))} maxFiles={6} />
+                </div>
               </section>
             </>
           )}
 
-          <div className="sticky bottom-4 z-10 flex items-center justify-between gap-3 rounded-2xl border border-[#dce5dc] bg-white/95 px-5 py-3 shadow-[0_18px_40px_rgb(24_35_27_/_0.12)] backdrop-blur">
-            <p className="text-xs text-[#607060]">Changes update your trust score instantly.</p>
-            <button disabled={saving || Boolean(uploading)} className="rounded-full bg-[#40533d] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-60">{saving ? "Saving…" : "Save profile"}</button>
+          <div className="sticky bottom-4 z-10 flex items-center justify-between gap-3 border border-rule bg-white/95 px-5 py-3 backdrop-blur">
+            <p className="text-xs text-[#607060]">{t("profile.changesNote")}</p>
+            <button disabled={saving || Boolean(uploading)} className="ui-btn disabled:opacity-60">{saving ? t("profile.saving") : t("profile.save")}</button>
           </div>
         </div>
       </form>

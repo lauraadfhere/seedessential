@@ -91,8 +91,8 @@ function OrderDetailBody() {
               <h2 className="text-lg font-semibold">Order items</h2>
               <ul className="mt-4 space-y-4">
                 {order.items.map((item) => (
-                  <li key={item.slug} className="flex gap-4 rounded-2xl bg-[#f8faf8] p-4">
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#eef3ed]">
+                  <li key={item.slug} className="flex gap-4 border border-rule bg-[#f8faf8] p-4">
+                    <div className="h-20 w-20 shrink-0 overflow-hidden border border-rule bg-[#eef3ed]">
                       {item.image && <ProductVisual product={{ slug: item.slug, name: item.name, kind: item.kind, category: item.category, price: item.price, image: item.image }} className="h-full" />}
                     </div>
                     <div className="flex-1">

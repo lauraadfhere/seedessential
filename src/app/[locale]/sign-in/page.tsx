@@ -17,6 +17,13 @@ function safeNextPath(raw: string | null, locale: string) {
   return value;
 }
 
+const DEMO_ACCOUNTS = [
+  { role: "Admin", email: "admin@seed.demo", password: "Admin#2026demo", hint: "Moderate & verify" },
+  { role: "Customer", email: "customer@seed.demo", password: "Customer#2026demo", hint: "Grower requests" },
+  { role: "Expert", email: "expert@seed.demo", password: "Expert#2026demo", hint: "Inbox & advice" },
+  { role: "Merchant", email: "merchant@seed.demo", password: "Merchant#2026demo", hint: "Equipment listings" },
+] as const;
+
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,7 +33,20 @@ function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [demoBusy, setDemoBusy] = useState<string>("");
   const nextPath = safeNextPath(searchParams.get("next"), locale);
+
+  async function completeLogin(loginEmail: string, loginPassword: string) {
+    const user = await getParse().User.logIn(loginEmail.trim().toLowerCase(), loginPassword);
+    const me = await fetch("/api/me", { headers: { Authorization: `Bearer ${user.getSessionToken()}` } });
+    if (me.status === 403) {
+      const data = await me.json().catch(() => ({}));
+      await getParse().User.logOut().catch(() => undefined);
+      throw new Error(data.reason ? `${data.error} Reason: ${data.reason}` : data.error || "This account is suspended.");
+    }
+    window.dispatchEvent(new Event("tannelli:auth"));
+    router.replace(nextPath ?? `/${locale}${homePathForRole(user.get("role"))}`);
+  }
 
   function continueWithEmail(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,20 +63,26 @@ function SignInForm() {
     setError("");
     setLoading(true);
     try {
-      const user = await getParse().User.logIn(email.trim().toLowerCase(), password);
-      const me = await fetch("/api/me", { headers: { Authorization: `Bearer ${user.getSessionToken()}` } });
-      if (me.status === 403) {
-        const data = await me.json().catch(() => ({}));
-        await getParse().User.logOut().catch(() => undefined);
-        setError(data.reason ? `${data.error} Reason: ${data.reason}` : data.error || "This account is suspended.");
-        return;
-      }
-      window.dispatchEvent(new Event("tannelli:auth"));
-      router.replace(nextPath ?? `/${locale}${homePathForRole(user.get("role"))}`);
-    } catch {
-      setError(t("auth.signInError"));
+      await completeLogin(email, password);
+    } catch (reason) {
+      setError(reason instanceof Error && reason.message && !reason.message.includes("Invalid") ? reason.message : t("auth.signInError"));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function signInAsDemo(account: (typeof DEMO_ACCOUNTS)[number]) {
+    setError("");
+    setDemoBusy(account.email);
+    setEmail(account.email);
+    setPassword(account.password);
+    setStep("password");
+    try {
+      await completeLogin(account.email, account.password);
+    } catch (reason) {
+      setError(reason instanceof Error && reason.message ? reason.message : t("auth.signInError"));
+    } finally {
+      setDemoBusy("");
     }
   }
 
@@ -73,6 +99,31 @@ function SignInForm() {
             </p>
           </div>
 
+          <div className="mb-6 border border-rule bg-panel">
+            <div className="border-b border-rule bg-panel-head px-3 py-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#40533d]">Demo access</p>
+              <p className="mt-0.5 text-xs text-[#607060]">Pick a role — no typing needed.</p>
+            </div>
+            <div className="grid gap-px bg-rule sm:grid-cols-2">
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  disabled={Boolean(demoBusy) || loading}
+                  onClick={() => void signInAsDemo(account)}
+                  className="bg-white px-3 py-3 text-left transition hover:bg-panel disabled:opacity-60"
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-[#18231b]">{account.role}</span>
+                    <span className="tmpl-chip !normal-case !tracking-normal">{demoBusy === account.email ? "Signing in…" : "Use"}</span>
+                  </span>
+                  <span className="mt-1 block text-[11px] text-[#607060]">{account.hint}</span>
+                  <span className="mt-1 block truncate text-[10px] text-[#789078]">{account.email}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {step === "email" ? (
             <form className="space-y-6" onSubmit={continueWithEmail}>
               <DeepInput
@@ -84,14 +135,14 @@ function SignInForm() {
                 required
                 autoFocus
               />
-              {error && <p role="alert" className="text-sm text-red-600 font-medium">{error}</p>}
+              {error && <p role="alert" className="text-sm font-medium text-red-600">{error}</p>}
               <DeepButton type="submit" fullWidth>
                 {t("auth.continue")}
               </DeepButton>
             </form>
           ) : (
             <form className="space-y-6" onSubmit={signIn}>
-              <div className="rounded-md border border-neutral-200 bg-[#f8f9f8] px-4 py-3">
+              <div className="border border-rule bg-panel px-4 py-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-sm text-neutral-500">{t("auth.email")}:</span>{" "}
@@ -119,7 +170,7 @@ function SignInForm() {
                 required
                 autoFocus
               />
-              {error && <p role="alert" className="text-sm text-red-600 font-medium">{error}</p>}
+              {error && <p role="alert" className="text-sm font-medium text-red-600">{error}</p>}
               <DeepButton type="submit" fullWidth loading={loading}>
                 {loading ? t("auth.signingIn") : t("auth.signIn")}
               </DeepButton>
@@ -138,21 +189,9 @@ function SignInForm() {
             </p>
             <p className="text-neutral-600">
               {t("auth.notEnrolled")}{" "}
-              <Link href="/sign-up" className="font-semibold text-[#40533d] hover:underline">{t("auth.signUp")}</Link>{" "}
-              {t("auth.enrollCta")}
+              <Link href="/sign-up" className="font-semibold text-[#40533d] hover:underline">{t("auth.signUp")}</Link>
             </p>
           </div>
-
-          {nextPath && (
-            <div className="mt-6 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3">
-              <p className="text-xs text-emerald-900">{t("auth.returnNotice")}</p>
-            </div>
-          )}
-
-          <p className="mt-6 text-xs leading-relaxed text-neutral-500">
-            {t("auth.privacyCommitment")}{" "}
-            <Link href="/about" className="text-[#40533d] hover:underline">{t("auth.privacyPolicy")}</Link>.
-          </p>
         </DeepCard>
       </main>
     </AuthShell>
@@ -161,7 +200,7 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-full flex-1 items-center justify-center bg-[#ebebeb]">Loading…</div>}>
+    <Suspense fallback={<main className="grid min-h-screen place-items-center text-sm text-neutral-600">Loading…</main>}>
       <SignInForm />
     </Suspense>
   );

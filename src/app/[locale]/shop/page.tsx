@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/product-card";
 import { Badge, Button, cn } from "@/components/ui";
 import { SearchIcon } from "@/components/icons";
 import { mergeLiveCatalog } from "@/lib/catalog";
+import { normalizeSearchTerm, useSearchHistory } from "@/lib/search-history";
 
 type Sort = "featured" | "price-asc" | "price-desc" | "rating";
 
@@ -23,6 +24,7 @@ function ShopContent() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [catalog, setCatalog] = useState<Product[] | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const { history, remember, forget, clear } = useSearchHistory();
 
   useEffect(() => {
     if (params.get("focusSearch") === "1") searchRef.current?.focus();
@@ -50,7 +52,7 @@ function ShopContent() {
       if (kind !== "all" && p.kind !== kind) return false;
       if (category !== "all" && p.category !== category) return false;
       if (inStockOnly && !p.inStock) return false;
-      if (query && !`${p.name} ${p.short}`.toLowerCase().includes(query.toLowerCase()))
+      if (query && !`${p.name} ${p.short} ${p.description} ${p.category}`.toLowerCase().includes(query.toLowerCase()))
         return false;
       return true;
     });
@@ -69,6 +71,16 @@ function ShopContent() {
     return list;
   }, [kind, category, query, sort, inStockOnly, liveProducts]);
 
+  const popular = useMemo(
+    () =>
+      liveProducts
+        .filter((p) => p.inStock)
+        .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
+        .slice(0, 4),
+    [liveProducts],
+  );
+  const browsing = kind !== "all" || category !== "all" || query !== "" || inStockOnly;
+
   return (
     <main className="section py-10">
       {/* Header */}
@@ -82,17 +94,53 @@ function ShopContent() {
             Plants, seeds and gardening equipment — delivered together.
           </p>
         </div>
-        <div className="flex w-full max-w-sm items-center gap-2 rounded-full border border-neutral-300 bg-white px-4 py-2.5">
+        <label className="ui-field flex w-full max-w-sm items-center gap-2 !py-0">
           <SearchIcon className="h-4 w-4 text-neutral-400" />
           <input
             ref={searchRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onBlur={() => { const clean = normalizeSearchTerm(query); if (clean) remember(clean); }}
+            onKeyDown={(e) => { if (e.key === "Enter") { const clean = normalizeSearchTerm(query); if (clean) remember(clean); } }}
+            maxLength={80}
             placeholder="Search plants & equipment"
-            className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
+            className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400"
           />
-        </div>
+        </label>
       </div>
+
+      {history.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-neutral-500">Recent searches:</span>
+          {history.map((term) => (
+            <span key={term} className="inline-flex items-center border border-rule bg-white">
+              <button type="button" onClick={() => setQuery(term)} className="px-3 py-1 hover:text-accent-strong">
+                {term}
+              </button>
+              <button type="button" aria-label={`Remove ${term}`} onClick={() => forget(term)} className="pr-2 text-neutral-400 hover:text-foreground">
+                ×
+              </button>
+            </span>
+          ))}
+          <button type="button" onClick={clear} className="font-semibold text-neutral-500 underline hover:text-foreground">
+            Clear history
+          </button>
+        </div>
+      )}
+
+      {!browsing && popular.length > 0 && (
+        <section className="mt-8" aria-labelledby="popular-products">
+          <div className="flex items-end justify-between">
+            <h2 id="popular-products" className="text-xl font-semibold">Popular right now</h2>
+            <p className="text-xs text-neutral-500">Top rated by growers</p>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {popular.map((p) => (
+              <ProductCard key={p.slug} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Kind tabs */}
       <div className="mt-6 flex gap-2">
@@ -110,10 +158,10 @@ function ShopContent() {
               setCategory("all");
             }}
             className={cn(
-              "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition",
+              "border px-4 py-2 text-xs font-semibold uppercase tracking-wide transition",
               kind === value
-                ? "bg-foreground text-white"
-                : "border border-neutral-200 bg-white hover:border-foreground",
+                ? "border-[#40533d] bg-[#40533d] text-white"
+                : "border-rule bg-white hover:border-[#40533d]",
             )}
           >
             {label}
@@ -130,10 +178,10 @@ function ShopContent() {
               <button
                 onClick={() => setCategory("all")}
                 className={cn(
-                  "rounded-xl px-3 py-2 text-left text-sm transition",
+                  "border px-3 py-2 text-left text-sm transition",
                   category === "all"
-                    ? "bg-accent-soft font-semibold text-accent-strong"
-                    : "text-neutral-600 hover:bg-neutral-100",
+                    ? "border-[#40533d] bg-accent-soft font-semibold text-accent-strong"
+                    : "border-transparent text-neutral-600 hover:bg-neutral-100",
                 )}
               >
                 All categories
@@ -143,10 +191,10 @@ function ShopContent() {
                   key={c.slug}
                   onClick={() => setCategory(c.slug)}
                   className={cn(
-                    "flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition",
+                    "flex items-center gap-2 border px-3 py-2 text-left text-sm transition",
                     category === c.slug
-                      ? "bg-accent-soft font-semibold text-accent-strong"
-                      : "text-neutral-600 hover:bg-neutral-100",
+                      ? "border-[#40533d] bg-accent-soft font-semibold text-accent-strong"
+                      : "border-transparent text-neutral-600 hover:bg-neutral-100",
                   )}
                 >
                   {c.name}
@@ -167,7 +215,7 @@ function ShopContent() {
             </label>
           </div>
 
-          <div className="rounded-2xl bg-accent-soft p-5">
+          <div className="tmpl-panel bg-accent-soft p-5">
             <p className="font-semibold text-accent-strong">Not sure what to buy?</p>
             <p className="mt-1 text-sm text-neutral-600">
               Answer 5 questions and we&apos;ll build your list.
@@ -189,7 +237,7 @@ function ShopContent() {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as Sort)}
-                className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-sm outline-none"
+                className="ui-field !w-auto !py-1.5 text-sm"
               >
                 <option value="featured">Featured</option>
                 <option value="price-asc">Price: low to high</option>
@@ -206,7 +254,7 @@ function ShopContent() {
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl border border-dashed border-neutral-300 p-12 text-center">
+            <div className="border border-dashed border-rule p-12 text-center">
               <p className="font-semibold">No products match your filters</p>
               <p className="mt-1 text-sm text-neutral-500">
                 Try clearing filters or searching something else.

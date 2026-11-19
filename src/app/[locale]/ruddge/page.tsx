@@ -52,7 +52,7 @@ function Diagnosis({ analysis }: { analysis: Analysis }) {
     <div className="mt-3 border border-[#e4ebe3] bg-[#f7faf6] p-4">
       <div className="flex flex-wrap items-center gap-2">
         <p className="font-semibold text-[#18231b]">{analysis.plant}</p>
-        <span className={cn("px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", confidenceTone(analysis.confidence))}>{analysis.confidence} confidence</span>
+        <span className={cn("px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider", confidenceTone(analysis.confidence))}>{analysis.confidence} confidence</span>
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {blocks.filter(([, items]) => items.length).map(([label, items]) => (
@@ -186,7 +186,7 @@ function RuddgeChat() {
             )}
             {messages.map((message) => (
               <article key={message.id} className={cn("max-w-[42rem]", message.role === "user" ? "ml-auto" : "")}>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#789078]">{message.role === "user" ? "You" : "RuddgeAI"}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[#789078]">{message.role === "user" ? "You" : "RuddgeAI"}</p>
                 {message.photos.length > 0 && (
                   <div className="mt-2 flex gap-2">
                     {message.photos.map((photo) => <img key={photo} src={mediaUrl(photo, 160)} alt="" className="h-16 w-16 object-cover" />)}

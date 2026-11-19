@@ -84,12 +84,12 @@ export default function ExpertProfile() {
           {expert.specialties.length > 0 && (
             <>
               <h3 className="mt-8 font-semibold">Specialisations</h3>
-              <div className="mt-3 flex flex-wrap gap-2">{expert.specialties.map((item) => <span key={item} className="rounded-full bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{item}</span>)}</div>
+              <div className="mt-3 flex flex-wrap gap-2">{expert.specialties.map((item) => <span key={item} className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{item}</span>)}</div>
             </>
           )}
 
           <h3 className="mt-10 font-semibold">Reviews from growers</h3>
-          <div className="network-card mt-4 rounded-2xl p-5">
+          <div className="network-card mt-4 p-5">
             <div className="flex flex-wrap items-center gap-4">
               <p className="text-3xl font-semibold">{summary.count ? summary.average.toFixed(1) : "–"}</p>
               <div className="text-sm text-[#607060]">
@@ -110,7 +110,7 @@ export default function ExpertProfile() {
           </div>
 
           {eligibility.canReview && (
-            <form onSubmit={submitReview} className="network-card mt-4 space-y-4 rounded-2xl p-5">
+            <form onSubmit={submitReview} className="network-card mt-4 space-y-4 p-5">
               <div>
                 <p className="font-semibold">Share your experience</p>
                 <p className="mt-1 text-sm text-[#607060]">You worked with {expert.name.split(" ")[0]} on a completed consultation. Your review helps other growers choose.</p>
@@ -118,7 +118,7 @@ export default function ExpertProfile() {
               <StarInput value={rating} onChange={setRating} />
               <RichEditor value={body} onChange={setBody} maxLength={1000} placeholder="What went well, and what could be better?" rows={4} />
               {message && <Notice tone={message.tone}>{message.text}</Notice>}
-              <button type="submit" disabled={saving} className="rounded-xl bg-[#40533d] px-5 py-3 text-sm font-bold text-white disabled:opacity-60">{saving ? "Sending…" : "Publish review"}</button>
+              <button type="submit" disabled={saving} className="bg-[#40533d] px-5 py-3 text-sm font-bold text-white disabled:opacity-60">{saving ? "Sending…" : "Publish review"}</button>
             </form>
           )}
           {!eligibility.canReview && message && <div className="mt-4"><Notice tone={message.tone}>{message.text}</Notice></div>}
@@ -128,19 +128,19 @@ export default function ExpertProfile() {
 
           <div className="mt-6 space-y-3">
             {reviews.length ? reviews.map((review) => (
-              <div key={review.id} className="network-card rounded-2xl p-4">
+              <div key={review.id} className="network-card p-4">
                 <p className="text-sm font-semibold text-amber-600">{"★".repeat(review.rating)}<span className="ml-2 text-xs font-normal text-[#789078]">{review.author} · {timeAgo(review.createdAt)}</span></p>
                 {review.body && <p className="mt-2 text-sm text-[#38463a]">{review.body}</p>}
               </div>
             )) : <p className="text-sm text-[#789078]">No reviews yet.</p>}
           </div>
         </div>
-        <aside className="network-card h-fit rounded-2xl p-6">
+        <aside className="network-card h-fit p-6">
           <h2 className="font-semibold">Coverage</h2>
           <p className="mt-2 text-sm text-[#607060]">{expert.online ? "Accepts online requests from all 58 wilayas." : "On-site requests only."}</p>
-          {expert.coverageWilayas.length > 0 && <div className="mt-4 flex flex-wrap gap-1.5">{expert.coverageWilayas.map((item) => <span key={item} className="rounded-full border border-[#dce5dc] px-2.5 py-1 text-xs font-semibold text-[#40533d]">{item}</span>)}</div>}
+          {expert.coverageWilayas.length > 0 && <div className="mt-4 flex flex-wrap gap-1.5">{expert.coverageWilayas.map((item) => <span key={item} className="border border-rule px-2.5 py-1 text-xs font-semibold text-[#40533d]">{item}</span>)}</div>}
           {expert.languages.length > 0 && <p className="mt-5 text-sm"><span className="font-semibold">Languages:</span> {expert.languages.join(", ")}</p>}
-          <Link href={`/experts/request?expert=${expert.slug}`} className="mt-6 block rounded-xl bg-[#40533d] px-4 py-3 text-center text-sm font-bold text-white">Send a detailed request</Link>
+          <Link href={`/experts/request?expert=${expert.slug}`} className="mt-6 block bg-[#40533d] px-4 py-3 text-center text-sm font-bold text-white">Send a detailed request</Link>
         </aside>
       </section>
     </main>

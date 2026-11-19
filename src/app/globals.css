@@ -10,6 +10,16 @@
   --accent-soft: #f4f7f2;
   --accent-lime: #9ad83a;
   --surface: #fafafa;
+  /* UMPT-style ruled panel language, remapped to Tannelli forest palette */
+  --panel: #f2f5f1;
+  --panel-head: #e8eee6;
+  --rule: #d5ddd2;
+  --hero-band: #40533d;
+  --link: #2f4a2c;
+  --link-hover: #1f3a1c;
+  --ok: #3d7a3a;
+  --alert: #b42318;
+  --sticky-site-header: 4.5rem;
 }
 
 /* A compact 10% reduction keeps dense marketplace and dashboard screens
@@ -27,6 +37,14 @@ html {
   --color-accent-lime: var(--accent-lime);
   --color-line: var(--line);
   --color-surface: var(--surface);
+  --color-panel: var(--panel);
+  --color-panel-head: var(--panel-head);
+  --color-rule: var(--rule);
+  --color-hero-band: var(--hero-band);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+  --color-ok: var(--ok);
+  --color-alert: var(--alert);
   --font-sans: var(--font-open-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -71,33 +89,28 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
   font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Hero “global network” language: lifted circular nodes, soft forest depth. */
+/* Inner app surface (not home hero). Soft forest wash, UMPT panel density. */
 .network-surface {
-  background-color: #f4f7f3;
+  background-color: var(--panel);
   background-image:
-    radial-gradient(circle at 11% 16%, rgb(64 83 61 / 0.09), transparent 24%),
-    radial-gradient(circle at 92% 8%, rgb(64 83 61 / 0.07), transparent 20%),
-    radial-gradient(circle at 78% 88%, rgb(38 59 45 / 0.06), transparent 28%);
+    linear-gradient(180deg, #ffffff 0%, var(--panel) 12rem);
 }
 
+/* UMPT-style ruled cards: square corners, hairline border, no soft lift. */
 .network-card {
   background: #fff;
-  border: 1px solid rgb(64 83 61 / 0.12);
-  box-shadow:
-    0 18px 50px rgb(24 35 27 / 0.1),
-    0 2px 8px rgb(24 35 27 / 0.04);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .network-card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .network-card-hover:hover {
-  transform: translateY(-4px);
-  border-color: rgb(158 177 155 / 0.9);
-  box-shadow:
-    0 24px 56px rgb(24 35 27 / 0.14),
-    0 4px 12px rgb(24 35 27 / 0.06);
+  border-color: #b7c4b4;
+  background: #fcfdfb;
 }
 
 .network-node {
@@ -208,30 +221,25 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
 
 .depth-card {
   background: #fff;
-  border: 1px solid rgb(15 23 42 / 0.06);
-  border-radius: 0.75rem;
-  box-shadow:
-    0 10px 30px rgb(15 23 42 / 0.08),
-    0 2px 6px rgb(15 23 42 / 0.04);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .depth-card-hover {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.16s ease, background-color 0.16s ease;
 }
 
 .depth-card-hover:hover {
-  border-color: rgb(15 23 42 / 0.1);
-  box-shadow:
-    0 12px 28px rgb(15 23 42 / 0.1),
-    0 2px 6px rgb(15 23 42 / 0.04);
+  border-color: #b7c4b4;
+  background: #fcfdfb;
 }
 
 .depth-float {
   background: #fff;
-  border-radius: 0.5rem;
-  box-shadow:
-    0 16px 40px rgb(15 23 42 / 0.12),
-    0 4px 12px rgb(15 23 42 / 0.06);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .badge-neu {
@@ -240,7 +248,7 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
   border-radius: 0.25rem;
   background: #d4e666;
   padding: 0.15rem 0.45rem;
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -319,16 +327,8 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
   100% { opacity: 1; }
 }
 
-@keyframes tannelli-letter-transition {
-  0% { opacity: 0; transform: translateY(16px) scale(0.9); filter: blur(9px); }
-  32% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-  68% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-  100% { opacity: 0; transform: translateY(-12px) scale(1.06); filter: blur(7px); }
-}
-
-@keyframes tannelli-letter-sheen {
-  0% { transform: translateX(-160%) skewX(-18deg); }
-  100% { transform: translateX(210%) skewX(-18deg); }
+@keyframes tannelli-spin {
+  to { transform: rotate(360deg); }
 }
 
 .tannelli-loader {
@@ -343,34 +343,17 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
   animation: tannelli-loader-appear 180ms ease-out both;
 }
 
-.tannelli-loader-letter {
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  color: #62a83d;
-  font-family: var(--font-open-sans), Arial, sans-serif;
-  font-size: clamp(5rem, 13vw, 8rem);
-  font-weight: 900;
-  line-height: 0.8;
-  letter-spacing: -0.12em;
-}
-
-.tannelli-loader-letter > span {
-  display: block;
-  animation: tannelli-letter-transition 1.25s cubic-bezier(.22,.61,.36,1) infinite;
-}
-
-.tannelli-loader-letter::after {
-  position: absolute;
-  inset: -15% auto -15% -55%;
-  width: 28%;
-  content: "";
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 82%), transparent);
-  animation: tannelli-letter-sheen 1.25s ease-in-out infinite;
+.tannelli-spinner {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  border: 4px solid rgb(98 168 61 / 18%);
+  border-top-color: #62a83d;
+  animation: tannelli-spin 0.9s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tannelli-loader, .tannelli-loader-letter > span, .tannelli-loader-letter::after { animation: none; }
+  .tannelli-spinner { animation-duration: 2.4s; }
 }
 
 ::selection {
@@ -398,25 +381,203 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
 .chrome-dropdown { animation: chrome-drop 140ms ease both; }
 @keyframes chrome-drop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
-/* Shared field + card language for inner pages */
+/* Shared field + card language — UMPT ruled inputs/cards, Tannelli colors.
+   Home hero/header do not use these classes. */
 .ui-field {
   width: 100%;
-  border: 1px solid #dce3d8;
+  border: 1px solid var(--rule);
+  border-radius: 0;
   background: #fff;
-  padding: 0.7rem 0.85rem;
-  font-size: 0.875rem;
-  color: #18231b;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9375rem;
+  color: #333;
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 140ms ease;
 }
 .ui-field:focus, .ui-field:focus-within {
-  border-color: #40533d;
-  box-shadow: 0 0 0 3px rgb(64 83 61 / 0.14);
+  border-color: var(--link);
+  box-shadow: none;
+}
+.ui-field:disabled {
+  background: var(--panel-head);
+  color: var(--muted);
 }
 .ui-card {
   background: #fff;
-  border: 1px solid #e4ebe3;
-  box-shadow: 0 1px 0 rgb(24 35 27 / 0.04), 0 10px 28px rgb(24 35 27 / 0.06);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  box-shadow: none;
+}
+.ui-card-head {
+  background: var(--panel-head);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #243322;
+}
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: var(--accent);
+  padding: 0.65rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  transition: background 140ms ease;
+}
+.ui-btn:hover { background: var(--accent-strong); }
+.ui-btn-outline {
+  background: #fff;
+  border: 1px solid var(--foreground);
+  color: var(--foreground);
+}
+.ui-btn-outline:hover { background: var(--panel); }
+
+/* Native controls on inner surfaces pick up the ruled look. */
+.network-surface input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.sr-only):not(.ui-field),
+.network-surface select:not(.ui-field),
+.network-surface textarea:not(.ui-field),
+.tmpl-rail input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.sr-only):not(.ui-field),
+.tmpl-rail select:not(.ui-field),
+.tmpl-rail textarea:not(.ui-field) {
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: #fff;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9375rem;
+  color: #333;
+  outline: none;
+}
+.network-surface input:not([type="checkbox"]):not([type="radio"]):focus,
+.network-surface select:focus,
+.network-surface textarea:focus,
+.tmpl-rail input:not([type="checkbox"]):not([type="radio"]):focus,
+.tmpl-rail select:focus,
+.tmpl-rail textarea:focus {
+  border-color: var(--link);
+}
+
+/* ---- Platform template shell (UMPT depth, Tannelli colors) ----
+   Layered bands + ruled panels. Home hero / site header stay untouched. */
+.tmpl-rail {
+  margin-inline: auto;
+  max-width: 75rem; /* 1200px */
+  padding-inline: 1.5rem;
+}
+.tmpl-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--hero-band);
+  color: #fff;
+}
+.tmpl-hero-title {
+  font-size: clamp(1.75rem, 2.4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.tmpl-crumbs {
+  margin-inline: auto;
+  max-width: 75rem;
+  padding: 1.15rem 1.5rem 0.85rem;
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: #5a6b58;
+}
+.tmpl-panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+}
+.tmpl-panel-head {
+  background: var(--panel-head);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #243322;
+}
+.tmpl-panel-body {
+  background: #fff;
+  padding: 1.25rem 1.5rem;
+}
+.tmpl-list {
+  border: 1px solid var(--rule);
+  background: #fff;
+}
+.tmpl-list-head {
+  border-bottom: 1px solid var(--rule);
+  background: var(--panel-head);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.tmpl-list-row {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.85rem 1rem;
+}
+.tmpl-list-row:last-child {
+  border-bottom: 0;
+}
+.tmpl-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #40533d;
+}
+.tmpl-chip-ok {
+  background: #eaf5e8;
+  border-color: #c6dfc2;
+  color: var(--ok);
+}
+.tmpl-chip-alert {
+  background: #fdf2f2;
+  border-color: #f0c9c5;
+  color: var(--alert);
+}
+.tmpl-chip-info {
+  background: #eef4ec;
+  border-color: #d0ddd0;
+  color: var(--link);
+}
+.tmpl-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border: 1px solid var(--rule);
+  background: #fff;
+  padding: 0.65rem 0.85rem;
+}
+.tmpl-notice {
+  border-inline-start: 4px solid var(--accent);
+  background: var(--panel);
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  color: #243322;
+}
+.tmpl-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #18231b;
+}
+.tmpl-section-title::before {
+  content: "";
+  display: block;
+  width: 3px;
+  height: 1.1em;
+  background: var(--accent);
 }
 
 /* ---- Plant parade (404 + loader): figures marching along a ground line ---- */
@@ -447,3 +608,45 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
 @media (prefers-reduced-motion: reduce) {
   .parade-track, .parade-figure, .parade-leg-a, .parade-leg-b, .chrome-dropdown, .float-up { animation: none; }
 }
+
+/* ---- Mobile / touch optimisation ----
+   Only applies to touch screens (coarse pointer) so desktop layouts are unchanged. */
+@media (pointer: coarse) {
+  /* Comfortable tap targets (WCAG 2.5.5 / Apple HIG: 44px minimum). */
+  button, [role="button"], summary, select, .chrome-nav-link {
+    min-height: 44px;
+  }
+  /* Form controls: 16px prevents iOS Safari from zooming on focus. */
+  input, select, textarea, .ui-field {
+    font-size: 16px;
+  }
+  /* Keep text readable without zoom and avoid long-word overflow. */
+  body {
+    -webkit-text-size-adjust: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Respect notched phones / home-indicator areas for fixed bottom UI. */
+@supports (padding: env(safe-area-inset-bottom)) {
+  @media (max-width: 639px) {
+    .fixed.bottom-5, .fixed.bottom-6 {
+      margin-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}
+
+/* ---- Impeccable review fixes (legibility, contrast, wrapping) ----
+   Floors functional micro-labels at 11px, lifts grey text on dark surfaces to
+   a WCAG AA ratio, and stops headings/body copy ending on a lone word. */
+.text-\[9px\], .text-\[10px\], .text-\[10\.5px\] {
+  font-size: 0.6875rem; /* 11px floor for functional UI text */
+}
+.bg-black .text-neutral-500,
+.bg-black .text-neutral-600,
+.bg-black .text-neutral-700,
+.bg-black .text-\[\#737373\] {
+  color: #a3a3a3; /* ~7:1 on black */
+}
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }

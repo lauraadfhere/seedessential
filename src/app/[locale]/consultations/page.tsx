@@ -55,19 +55,29 @@ function ConsultationsBody() {
         <Button href="/experts/request" shape="rect" variant="light">New request</Button>
       </PageHero>
 
-      <section className="section py-10">
+      <nav className="tmpl-crumbs" aria-label="Breadcrumb">
+        <a href="/" className="text-link hover:underline">Home</a>
+        <span className="mx-1.5 text-[#9aab96]">›</span>
+        <span className="text-[#243322]">My expert requests</span>
+      </nav>
+      <section className="tmpl-rail py-8">
         {error && <Notice tone="error">{error}</Notice>}
+        <div className="tmpl-panel">
+          <div className="tmpl-panel-head flex flex-wrap items-center justify-between gap-4">
+            <span>Your consultation board</span>
+            <Button href="/experts" shape="rect" variant="outline">Browse experts</Button>
+          </div>
+          <div className="tmpl-panel-body">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Tabs value={tab} onChange={setTab} items={[
             { value: "active", label: "In progress", count: count("active") },
             { value: "answered", label: "Recommendations", count: count("answered") },
             { value: "closed", label: "Closed", count: count("closed") },
           ]} />
-          <Button href="/experts" shape="rect" variant="outline">Browse experts</Button>
         </div>
 
         {loading ? (
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((key) => <div key={key} className="h-72 animate-pulse rounded-[1.5rem] bg-white/70" />)}</div>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((key) => <div key={key} className="h-72 animate-pulse border border-rule bg-panel" />)}</div>
         ) : visible.length ? (
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((request) => (
@@ -90,21 +100,23 @@ function ConsultationsBody() {
 
         {consultations.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-xl font-semibold">Booked consultations</h2>
+            <h2 className="tmpl-section-title">Booked consultations</h2>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {consultations.map((consultation) => (
-                <div key={consultation.id} className="network-card flex items-center justify-between gap-4 rounded-[1.5rem] p-5">
+                <div key={consultation.id} className="tmpl-list flex items-center justify-between gap-4 p-5">
                   <div>
                     <p className="font-semibold">{consultation.serviceTitle}</p>
                     {consultation.expert && <p className="mt-1 text-sm text-[#607060]">with {consultation.expert.name}</p>}
                     {consultation.scheduledAt && <p className="mt-1 text-sm text-[#607060]">{new Date(consultation.scheduledAt).toLocaleString()}</p>}
                   </div>
-                  {consultation.meetingUrl && <a href={consultation.meetingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-[#40533d] px-4 py-2 text-xs font-bold text-white">Join</a>}
+                  {consultation.meetingUrl && <a href={consultation.meetingUrl} target="_blank" rel="noopener noreferrer" className="bg-[#40533d] px-4 py-2 text-xs font-bold text-white">Join</a>}
                 </div>
               ))}
             </div>
           </div>
         )}
+          </div>
+        </div>
       </section>
     </main>
   );

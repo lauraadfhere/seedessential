@@ -10,6 +10,14 @@ import { CloseIcon, LinkedInIcon, SearchIcon } from "./icons";
 import { CartLink } from "./cart-link";
 import { AccountMenu, NotificationBell, useAccount, workspaceFor } from "./header-parts";
 import { useI18n } from "@/lib/i18n";
+import { useSearchHistory } from "@/lib/search-history";
+import type { Product } from "@/lib/data";
+
+type SearchExpert = { id?: string; slug?: string; name: string; professionalCategory?: string };
+
+function matches(text: string, term: string) {
+  return text.toLowerCase().includes(term);
+}
 
 const publicNav = [
   { key: "nav.shop", href: "/shop" },
@@ -36,10 +44,51 @@ export function SiteHeader({ onCartClick }: SiteHeaderProps) {
   const [query, setQuery] = useState("");
   const { account, summary, setAccount } = useAccount(pathname);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [results, setResults] = useState<{ products: Product[]; experts: SearchExpert[] } | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
+  const { history, remember, forget } = useSearchHistory();
+  const term = query.trim().toLowerCase();
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
   useEffect(() => { if (searchOpen) inputRef.current?.focus(); }, [searchOpen]);
   const active = (href: string) => pathname === `/${locale}${href}` || pathname.startsWith(`/${locale}${href}/`);
-  function submitSearch(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const term = query.trim(); router.push(`/${locale}/shop${term ? `?q=${encodeURIComponent(term)}` : "?focusSearch=1"}`); setSearchOpen(false); }
+  useEffect(() => {
+    if (!searchOpen || term.length < 2) { setResults(null); setSearching(false); setSearchFailed(false); return; }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setSearching(true);
+      setSearchFailed(false);
+      try {
+        const [productsRes, expertsRes] = await Promise.all([
+          fetch("/api/catalog/products", { signal: controller.signal }),
+          fetch(`/api/experts?q=${encodeURIComponent(term)}`, { signal: controller.signal }),
+        ]);
+        const products: Product[] = productsRes.ok ? await productsRes.json() : [];
+        const experts: SearchExpert[] = expertsRes.ok ? await expertsRes.json() : [];
+        if (!productsRes.ok && !expertsRes.ok) throw new Error("search");
+        setResults({
+          products: products.filter((p) => [p.name, p.short, p.description, p.category].some((v) => v && matches(String(v), term))).slice(0, 6),
+          experts: experts.slice(0, 4),
+        });
+      } catch (error) {
+        if (!controller.signal.aborted) { setSearchFailed(true); setResults(null); }
+      } finally {
+        if (!controller.signal.aborted) setSearching(false);
+      }
+    }, 250);
+    return () => { controller.abort(); window.clearTimeout(timer); };
+  }, [term, searchOpen]);
+  function goTo(href: string, value: string) { remember(value); setSearchOpen(false); setQuery(""); router.push(href); }
+  function submitSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const value = query.trim();
+    if (!value) { setSearchOpen(false); router.push(`/${locale}/shop?focusSearch=1`); return; }
+    const first = results?.products[0];
+    if (first) return goTo(`/${locale}/shop/${first.slug}`, value);
+    const expert = results?.experts[0];
+    if (expert?.slug) return goTo(`/${locale}/experts/${expert.slug}`, value);
+    goTo(`/${locale}/shop?q=${encodeURIComponent(value)}`, value);
+  }
   const workspace = workspaceFor(account?.role);
   const nav = account ? [...signedInNav, { key: workspace.label, href: workspace.href.split("?")[0] }] : publicNav;
 
@@ -65,6 +114,14 @@ export function SiteHeader({ onCartClick }: SiteHeaderProps) {
     {searchOpen && <div role="dialog" aria-modal="true" aria-label={t("search.dialog")} className="fixed inset-x-0 bottom-0 top-[5.25rem] z-50 grid bg-black/45 p-4 backdrop-blur-sm sm:place-items-start sm:pt-10">
       <form onSubmit={submitSearch} className="w-full rounded-2xl bg-white p-3 shadow-2xl sm:max-w-2xl sm:p-4">
         <div className="flex items-center gap-3"><SearchIcon className="h-5 w-5 shrink-0 text-[#40533d]"/><input ref={inputRef} value={query} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 bg-transparent py-2 text-base text-foreground outline-none placeholder:text-neutral-500" placeholder={t("search.placeholder")} aria-label={t("search.placeholder")}/><button type="button" onClick={() => setSearchOpen(false)} aria-label={t("search.close")} className="grid h-9 w-9 place-items-center rounded-full text-neutral-500 transition hover:bg-neutral-100"><CloseIcon className="h-5 w-5"/></button></div>
+        {term.length < 2 && history.length > 0 && <div className="mt-3 border-t border-neutral-100 pt-3"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Recent searches</p><ul className="flex flex-wrap gap-2">{history.map((item) => <li key={item} className="flex items-center rounded-full bg-neutral-100 text-sm"><button type="button" onClick={() => setQuery(item)} className="px-3 py-1 text-neutral-800 hover:text-[#40533d]">{item}</button><button type="button" onClick={() => forget(item)} aria-label={`Remove ${item}`} className="pr-2 text-neutral-400 hover:text-neutral-700">×</button></li>)}</ul></div>}
+        {term.length >= 2 && <div aria-live="polite" className="mt-3 max-h-[60vh] overflow-y-auto border-t border-neutral-100 pt-3">
+          {searching && <p className="py-4 text-sm text-neutral-500">Searching…</p>}
+          {searchFailed && <p className="py-4 text-sm text-red-600">Search is unavailable right now. Press Enter to browse the shop.</p>}
+          {results && !searching && results.products.length === 0 && results.experts.length === 0 && <p className="py-4 text-sm text-neutral-500">No products or experts match “{query.trim()}”. Press Enter to search the shop.</p>}
+          {results && !searching && results.products.length > 0 && <div><p className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Products</p><ul>{results.products.map((p) => <li key={p.slug}><button type="button" onClick={() => goTo(`/${locale}/shop/${p.slug}`, query)} className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-neutral-100"><span className="font-semibold text-neutral-900">{p.name}</span><span className="truncate text-xs text-neutral-500">{p.short}</span></button></li>)}</ul></div>}
+          {results && !searching && results.experts.length > 0 && <div className="mt-3"><p className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">Experts</p><ul>{results.experts.map((e) => <li key={e.slug ?? e.id ?? e.name}><button type="button" disabled={!e.slug} onClick={() => e.slug && goTo(`/${locale}/experts/${e.slug}`, query)} className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-neutral-100 disabled:opacity-60"><span className="font-semibold text-neutral-900">{e.name}</span><span className="truncate text-xs text-neutral-500">{e.professionalCategory}</span></button></li>)}</ul></div>}
+        </div>}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-100 pt-3"><p className="text-xs text-neutral-500">{t("search.description")}</p><button type="submit" className="rounded-full bg-[#40533d] px-5 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#334532]">{t("nav.shop")}</button></div>
       </form>
     </div>}

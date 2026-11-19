@@ -96,7 +96,7 @@ function WishlistBody() {
 
       <section className="section py-10">
         {wishlist.length === 0 ? (
-          <div className="network-card rounded-[1.75rem] p-12 text-center">
+          <div className="network-card p-12 text-center">
             <p className="text-lg font-semibold">Your wishlist is empty</p>
             <p className="mt-2 text-sm text-[#607060]">
               Save plants and equipment you're interested in by clicking the heart icon on product pages.
@@ -112,7 +112,7 @@ function WishlistBody() {
               return (
                 <div
                   key={item.id}
-                  className="network-card rounded-[1.75rem] p-6"
+                  className="network-card p-6"
                 >
                   <div className="flex justify-between">
                     <Badge tone={item.product.kind === "plant" ? "green" : "neutral"}>
@@ -127,7 +127,7 @@ function WishlistBody() {
                     </button>
                   </div>
                   
-                  <div className="mt-4 aspect-square overflow-hidden rounded-2xl bg-[#eef3ed]">
+                  <div className="mt-4 aspect-square overflow-hidden border border-rule bg-[#eef3ed]">
                     <ProductVisual product={item.product} className="h-full" />
                   </div>
 

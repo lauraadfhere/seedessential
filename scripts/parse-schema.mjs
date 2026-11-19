@@ -293,7 +293,7 @@ const classes = [
       user: { type: "Pointer", targetClass: "_User", required: true },
       address: { type: "Pointer", targetClass: "Address" },
       orderNumber: { type: "String", required: true },
-      status: { type: "String", required: true }, // pending/paid/processing/shipped/delivered/cancelled/refunded
+      status: { type: "String", required: true }, // placed/confirmed/preparing/shipped/out_for_delivery/delivered/cancelled
       currency: { type: "String", required: true },
       total: { type: "Number", required: true },
       paymentStatus: { type: "String", required: true }, // unpaid/authorized/paid/failed/refunded
@@ -473,6 +473,20 @@ const classes = [
       photos: { type: "Array" },
       model: { type: "String" },
       analysis: { type: "Object" },
+    },
+  ],
+  [
+    "Complaint",
+    {
+      customer: { type: "Pointer", targetClass: "_User", required: true },
+      targetType: { type: "String", required: true }, // product/service
+      targetName: { type: "String", required: true },
+      subject: { type: "String", required: true },
+      body: { type: "String", required: true },
+      status: { type: "String", required: true }, // open/in_review/resolved/rejected, or pending while moderation holds it
+      resolution: { type: "String" },
+      moderationFlags: { type: "Array" },
+      handledBy: { type: "Pointer", targetClass: "_User" },
     },
   ],
   [

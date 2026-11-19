@@ -8,15 +8,16 @@ import type { ComponentProps, ReactNode } from "react";
  */
 
 // Enhanced depth shadow utilities
+/* UMPT ruled language: borders + panel fills, no soft elevation. */
 const depthShadows = {
-  card: "shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1),0_8px_16px_-4px_rgba(0,0,0,0.15)]",
-  cardHover: "shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1),0_20px_25px_-5px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.15),0_8px_10px_-6px_rgba(0,0,0,0.1)]",
-  form: "shadow-[0_2px_8px_rgba(0,0,0,0.08),0_8px_16px_rgba(0,0,0,0.12)]",
-  input: "shadow-[0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(0,0,0,0.05)]",
-  inputFocus: "shadow-[0_0_0_3px_rgba(64,83,61,0.15),0_4px_12px_rgba(64,83,61,0.2)]",
-  button: "shadow-[0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]",
-  buttonHover: "shadow-[0_4px_8px_rgba(0,0,0,0.15),0_8px_16px_rgba(0,0,0,0.2)]",
-  floating: "shadow-[0_8px_16px_rgba(0,0,0,0.12),0_16px_32px_rgba(0,0,0,0.16)]",
+  card: "",
+  cardHover: "",
+  form: "",
+  input: "",
+  inputFocus: "",
+  button: "",
+  buttonHover: "",
+  floating: "",
 };
 
 /**
@@ -34,9 +35,9 @@ export function DeepCard({
   variant?: "default" | "form" | "floating";
 }) {
   const variants = {
-    default: "bg-white border border-neutral-200/50 rounded-md",
-    form: "bg-white border border-neutral-200 rounded-md",
-    floating: "bg-white border border-neutral-100/50 rounded-lg",
+    default: "bg-white border border-rule",
+    form: "bg-white border border-rule",
+    floating: "bg-white border border-rule",
   };
 
   const shadowVariants = {
@@ -50,8 +51,8 @@ export function DeepCard({
       className={cn(
         variants[variant],
         shadowVariants[variant],
-        "transition-all duration-300",
-        hover && "hover:-translate-y-1",
+        "transition-[border-color,background-color] duration-160",
+        hover && "hover:border-[#b7c4b4] hover:bg-[#fcfdfb]",
         className
       )}
     >
@@ -170,10 +171,11 @@ export function DeepInput({
   className?: string;
   icon?: ReactNode;
 } & Omit<ComponentProps<"input">, "value" | "onChange">) {
+  const errorId = `${props.id ?? props.name ?? label ?? "input"}-error`;
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
-        <label className="text-sm font-semibold text-neutral-800">
+        <label htmlFor={props.id} className="text-sm font-semibold text-neutral-800">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -191,20 +193,19 @@ export function DeepInput({
           onChange={(e) => onChange?.(e.target.value)}
           required={required}
           disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : props["aria-describedby"]}
           className={cn(
-            "w-full rounded-md border border-neutral-300 bg-white px-4 py-3 text-sm outline-none transition-all duration-200",
+            "ui-field",
             Boolean(icon) && "pl-10",
-            !disabled && "focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/20",
-            depthShadows.input,
-            !disabled && "focus:shadow-[0_0_0_3px_rgba(64,83,61,0.15),0_4px_12px_rgba(64,83,61,0.2)]",
-            disabled && "bg-neutral-50 cursor-not-allowed opacity-60",
-            error && "border-red-300 focus:border-red-500 focus:ring-red-500/20",
+            disabled && "cursor-not-allowed opacity-60",
+            error && "!border-alert",
             className
           )}
           {...props}
         />
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p id={errorId} className="text-sm text-alert">{error}</p>}
     </div>
   );
 }
@@ -247,12 +248,9 @@ export function DeepSelect({
         required={required}
         disabled={disabled}
         className={cn(
-          "w-full rounded-md border border-neutral-300 bg-white px-4 py-3 text-sm outline-none transition-all duration-200",
-          !disabled && "focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/20",
-          depthShadows.input,
-          !disabled && "focus:shadow-[0_0_0_3px_rgba(64,83,61,0.15),0_4px_12px_rgba(64,83,61,0.2)]",
-          disabled && "bg-neutral-50 cursor-not-allowed opacity-60",
-          error && "border-red-300 focus:border-red-500 focus:ring-red-500/20",
+          "ui-field",
+          disabled && "cursor-not-allowed opacity-60",
+          error && "!border-alert",
           className
         )}
       >
@@ -263,7 +261,7 @@ export function DeepSelect({
           </option>
         ))}
       </select>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-alert">{error}</p>}
     </div>
   );
 }
@@ -308,16 +306,13 @@ export function DeepTextarea({
         disabled={disabled}
         rows={rows}
         className={cn(
-          "w-full rounded-md border border-neutral-300 bg-white px-4 py-3 text-sm outline-none transition-all duration-200 resize-none",
-          !disabled && "focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/20",
-          depthShadows.input,
-          !disabled && "focus:shadow-[0_0_0_3px_rgba(64,83,61,0.15),0_4px_12px_rgba(64,83,61,0.2)]",
-          disabled && "bg-neutral-50 cursor-not-allowed opacity-60",
-          error && "border-red-300 focus:border-red-500 focus:ring-red-500/20",
+          "ui-field resize-none",
+          disabled && "cursor-not-allowed opacity-60",
+          error && "!border-alert",
           className
         )}
       />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-alert">{error}</p>}
     </div>
   );
 }
@@ -362,9 +357,8 @@ export function DeepButton({
   };
 
   const buttonClassName = cn(
-    "rounded-md font-semibold transition-all duration-200",
-    variants[variant], sizes[size], depthShadows.button,
-    !disabled && !loading && "hover:shadow-[0_4px_8px_rgba(0,0,0,0.15),0_8px_16px_rgba(0,0,0,0.2)] hover:-translate-y-0.5",
+    "font-semibold transition-colors duration-150",
+    variants[variant], sizes[size],
     (disabled || loading) && "opacity-60 cursor-not-allowed", fullWidth && "w-full", className
   );
   const content = loading ? (
@@ -405,12 +399,11 @@ export function DeepOptionCard({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "w-full rounded-md border-2 bg-white p-4 text-left transition-all duration-200",
+        "w-full border bg-white p-4 text-left transition-[border-color,background-color] duration-150",
         selected
-          ? "border-[#40533d] bg-[#40533d]/5 shadow-[0_0_0_3px_rgba(64,83,61,0.15),0_4px_12px_rgba(64,83,61,0.2)]"
-          : "border-neutral-200 hover:border-[#40533d]/50 hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)]",
+          ? "border-[#40533d] bg-panel"
+          : "border-rule hover:border-[#b7c4b4]",
         disabled && "opacity-50 cursor-not-allowed",
-        !disabled && !selected && "hover:-translate-y-0.5",
         className
       )}
     >
@@ -472,5 +465,92 @@ export function DeepFormSection({
       )}
       {children}
     </div>
+  );
+}
+
+/**
+ * TemplateHero — full-bleed title band (UMPT PageShell hero pattern,
+ * Tannelli forest colors). Does not replace the marketing home hero.
+ */
+export function TemplateHero({
+  title,
+  text,
+  actions,
+  className,
+}: {
+  title: string;
+  text?: string;
+  actions?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn("tmpl-hero", className)}>
+      <div className="tmpl-rail flex flex-wrap items-end justify-between gap-5 py-9 sm:py-11">
+        <div className="max-w-2xl">
+          <h1 className="tmpl-hero-title">{title}</h1>
+          {text ? <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/80">{text}</p> : null}
+        </div>
+        {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+      </div>
+    </section>
+  );
+}
+
+/** Ruled panel with optional head bar (UMPT SectionTitle / Panel). */
+export function TemplatePanel({
+  title,
+  children,
+  className,
+  bodyClassName,
+}: {
+  title?: string;
+  children: ReactNode;
+  className?: string;
+  bodyClassName?: string;
+}) {
+  return (
+    <div className={cn("tmpl-panel", className)}>
+      {title ? <div className="tmpl-panel-head">{title}</div> : null}
+      <div className={cn("tmpl-panel-body", bodyClassName)}>{children}</div>
+    </div>
+  );
+}
+
+/** Bordered list with head + rows. */
+export function TemplateList({
+  title,
+  children,
+  className,
+  empty,
+}: {
+  title?: string;
+  children: ReactNode;
+  className?: string;
+  empty?: ReactNode;
+}) {
+  return (
+    <div className={cn("tmpl-list", className)}>
+      {title ? <div className="tmpl-list-head">{title}</div> : null}
+      {children || empty}
+    </div>
+  );
+}
+
+export function TemplateCrumbs({ items }: { items: { label: string; href?: string }[] }) {
+  return (
+    <nav className="tmpl-crumbs" aria-label="Breadcrumb">
+      {items.map((item, index) => (
+        <span key={`${item.label}-${index}`}>
+          {index > 0 ? <span className="mx-1.5 text-[#9aab96]">›</span> : null}
+          {item.href ? (
+            <Link href={item.href} className="text-link hover:underline">
+              {item.label}
+            </Link>
+          ) : (
+            <span className="text-[#243322]">{item.label}</span>
+          )}
+        </span>
+      ))}
+    </nav>
   );
 }

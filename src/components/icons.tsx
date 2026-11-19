@@ -133,9 +133,43 @@ export function PackageIcon({ className }: IconProps) {
 
 export function LeafMark({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={`${base} ${className ?? ""}`}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={`${base} ${className ?? ""}`}>
       <path d="M5 19c9 0 14-5 14-14-9 0-14 5-14 14Z" strokeLinejoin="round" />
       <path strokeLinecap="round" d="M5 19c0-5 2.5-8.5 6-11" />
+    </svg>
+  );
+}
+
+/** Seedling / food crops — for “Grow your food” tiles. */
+export function SproutIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} className={`${base} ${className ?? ""}`}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21V11" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14c-3.5 0-6-2-7-5 3.5 0 6 2 7 5Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 12c3.5 0 6-2.5 7-5.5-3.5 0-6 2.5-7 5.5Z" />
+      <path strokeLinecap="round" d="M8 21h8" />
+    </svg>
+  );
+}
+
+/** Planter pot — for “Pots & growing” tiles. */
+export function PotIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} className={`${base} ${className ?? ""}`}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 9h10l-1.2 10.2a1.5 1.5 0 0 1-1.5 1.3H9.7a1.5 1.5 0 0 1-1.5-1.3L7 9Z" />
+      <path strokeLinecap="round" d="M6 9h12" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v4M9.5 5.5 12 3l2.5 2.5" />
+    </svg>
+  );
+}
+
+/** Hand tools — for “Care & tools” tiles. */
+export function ToolsIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} className={`${base} ${className ?? ""}`}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="m14.5 4.5 5 5-9.2 9.2a2.1 2.1 0 0 1-3-3L14.5 4.5Z" />
+      <path strokeLinecap="round" d="m16.5 6.5 2.2-2.2a1.6 1.6 0 0 1 2.3 2.3L18.8 8.8" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 20l3.2-1.1 1.1 1.1L7.2 23 4 20Z" />
     </svg>
   );
 }

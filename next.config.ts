@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Keep parse's Node entry off the client bundle; browser code uses getParse().
+  serverExternalPackages: ["parse"],
 };
 
 export default nextConfig;

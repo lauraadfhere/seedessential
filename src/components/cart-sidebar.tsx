@@ -77,7 +77,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full p-2 hover:bg-neutral-100 transition-colors"
+              className="p-2 hover:bg-neutral-100 transition-colors"
               aria-label={t("cart.close")}
             >
               <CloseIcon className="h-5 w-5 text-[#607060]" />
@@ -104,9 +104,9 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   return (
                     <div
                       key={item.slug}
-                      className="flex gap-3 rounded-xl border border-[#e4ebe3] p-3 bg-white"
+                      className="network-card flex gap-3 p-3"
                     >
-                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-[#eef3ed]">
+                      <div className="h-20 w-20 shrink-0 overflow-hidden border border-rule bg-[#eef3ed]">
                         {product ? (
                           <ProductVisual
                             product={{ ...product, image: item.image ?? product.image }}
@@ -143,7 +143,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                           </button>
                         </div>
                         <div className="mt-2 flex items-center justify-between">
-                          <div className="flex items-center rounded-full border border-[#dce5dc] bg-white">
+                          <div className="flex items-center border border-rule bg-white">
                             <button
                               type="button"
                               onClick={() => cart.updateQuantity(item.slug, item.quantity - 1)}
@@ -181,9 +181,9 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   {cart.suggestions.slice(0, 2).map((suggestion) => (
                     <div
                       key={suggestion.product.slug}
-                      className="flex gap-3 rounded-xl border border-[#e4ebe3] p-3 bg-[#f4f7f2]"
+                      className="network-card flex gap-3 bg-[#f4f7f2] p-3"
                     >
-                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-[#eef3ed]">
+                      <div className="h-16 w-16 shrink-0 overflow-hidden border border-rule bg-[#eef3ed]">
                         <ProductVisual product={suggestion.product} className="h-full" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -229,10 +229,10 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     type="button"
                     onClick={() => cart.setDeliveryMethod("home")}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition",
+                      "flex-1 flex items-center justify-center gap-2 border px-3 py-2 text-xs font-medium transition",
                       cart.deliveryMethod === "home"
                         ? "border-[#40533d] bg-[#40533d] text-white"
-                        : "border-[#e4ebe3] bg-white hover:border-[#40533d]"
+                        : "border-rule bg-white hover:border-[#40533d]"
                     )}
                   >
                     <TruckIcon className="h-4 w-4" />
@@ -242,10 +242,10 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     type="button"
                     onClick={() => cart.setDeliveryMethod("stop_desk")}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition",
+                      "flex-1 flex items-center justify-center gap-2 border px-3 py-2 text-xs font-medium transition",
                       cart.deliveryMethod === "stop_desk"
                         ? "border-[#40533d] bg-[#40533d] text-white"
-                        : "border-[#e4ebe3] bg-white hover:border-[#40533d]"
+                        : "border-rule bg-white hover:border-[#40533d]"
                     )}
                   >
                     <BagIcon className="h-4 w-4" />
@@ -259,10 +259,10 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     type="button"
                     onClick={() => cart.setPaymentMethod("cod")}
                     className={cn(
-                      "flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition",
+                      "flex-1 border px-3 py-2 text-xs font-medium transition",
                       cart.paymentMethod === "cod"
                         ? "border-[#40533d] bg-[#40533d] text-white"
-                        : "border-[#e4ebe3] bg-white hover:border-[#40533d]"
+                        : "border-rule bg-white hover:border-[#40533d]"
                     )}
                   >
                     COD
@@ -271,10 +271,10 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     type="button"
                     onClick={() => cart.setPaymentMethod("card")}
                     className={cn(
-                      "flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition",
+                      "flex-1 border px-3 py-2 text-xs font-medium transition",
                       cart.paymentMethod === "card"
                         ? "border-[#40533d] bg-[#40533d] text-white"
-                        : "border-[#e4ebe3] bg-white hover:border-[#40533d]"
+                        : "border-rule bg-white hover:border-[#40533d]"
                     )}
                   >
                     Card
@@ -319,7 +319,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   {cart.tips.slice(0, 1).map((tip) => (
                     <div
                       key={tip.id}
-                      className="rounded-lg bg-[#e8f0e8] p-3 text-xs"
+                      className="border border-rule bg-[#e8f0e8] p-3 text-xs"
                     >
                       <p className="font-semibold text-[#40533d]">{tip.title}</p>
                       <p className="text-[#607060] mt-1">{tip.text}</p>

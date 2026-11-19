@@ -4,12 +4,10 @@ import { useState } from "react";
 import { useCart } from "./cart-provider";
 import { 
   getShippingQuote, 
-  getProviderById, 
-  SHIPPING_PROVIDERS,
   type DeliveryMethod,
   type PaymentMethod 
 } from "@/lib/shipping";
-import { Badge, Button, cn } from "./ui";
+import { Badge, cn } from "./ui";
 import { TruckIcon, PackageIcon, CreditCardIcon, ClockIcon } from "./icons";
 
 export function ShippingSelector() {
@@ -22,10 +20,6 @@ export function ShippingSelector() {
     cart.subtotalDzd,
     cart.deliveryMethod
   );
-  
-  const selectedProvider = cart.shippingProvider 
-    ? getProviderById(cart.shippingProvider) 
-    : shippingQuote.recommended.provider;
   
   const selectedMethod = cart.deliveryMethod || "home";
   
@@ -60,7 +54,7 @@ export function ShippingSelector() {
       </div>
       
       {/* Selected option summary */}
-      <div className="rounded-xl border-2 border-[#40533d] bg-[#f4f7f2] p-4">
+      <div className="border-2 border-[#40533d] bg-panel p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -93,7 +87,7 @@ export function ShippingSelector() {
       
       {/* Expanded options */}
       {expanded && (
-        <div className="space-y-4 rounded-2xl border border-[#e4ebe3] p-4">
+        <div className="space-y-4 border border-rule bg-panel p-4">
           {/* Delivery method selection */}
           <div>
             <h4 className="mb-3 text-sm font-semibold">Delivery Method</h4>
@@ -102,10 +96,10 @@ export function ShippingSelector() {
                 type="button"
                 onClick={() => handleMethodSelect("home")}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl border p-3 text-left transition",
+                  "flex items-center gap-3 border p-3 text-left transition",
                   selectedMethod === "home"
-                    ? "border-[#40533d] bg-[#f4f7f2]"
-                    : "border-[#e4ebe3] hover:border-[#40533d]"
+                    ? "border-[#40533d] bg-white"
+                    : "border-rule bg-white hover:border-[#40533d]"
                 )}
               >
                 <TruckIcon className="h-5 w-5 text-[#40533d]" />
@@ -118,10 +112,10 @@ export function ShippingSelector() {
                 type="button"
                 onClick={() => handleMethodSelect("stop_desk")}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl border p-3 text-left transition",
+                  "flex items-center gap-3 border p-3 text-left transition",
                   selectedMethod === "stop_desk"
-                    ? "border-[#40533d] bg-[#f4f7f2]"
-                    : "border-[#e4ebe3] hover:border-[#40533d]"
+                    ? "border-[#40533d] bg-white"
+                    : "border-rule bg-white hover:border-[#40533d]"
                 )}
               >
                 <PackageIcon className="h-5 w-5 text-[#40533d]" />
@@ -145,10 +139,10 @@ export function ShippingSelector() {
                     type="button"
                     onClick={() => handleProviderSelect(option.provider.id)}
                     className={cn(
-                      "w-full flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition",
+                      "w-full flex items-center justify-between gap-3 border p-3 text-left transition",
                       cart.shippingProvider === option.provider.id
-                        ? "border-[#40533d] bg-[#f4f7f2]"
-                        : "border-[#e4ebe3] hover:border-[#40533d]"
+                        ? "border-[#40533d] bg-white"
+                        : "border-rule bg-white hover:border-[#40533d]"
                     )}
                   >
                     <div className="flex-1">
@@ -196,10 +190,10 @@ export function ShippingSelector() {
                 type="button"
                 onClick={() => handlePaymentSelect("cod")}
                 className={cn(
-                  "flex items-center gap-2 rounded-xl border p-3 text-left transition",
+                  "flex items-center gap-2 border p-3 text-left transition",
                   cart.paymentMethod === "cod"
-                    ? "border-[#40533d] bg-[#f4f7f2]"
-                    : "border-[#e4ebe3] hover:border-[#40533d]"
+                    ? "border-[#40533d] bg-white"
+                    : "border-rule bg-white hover:border-[#40533d]"
                 )}
               >
                 <CreditCardIcon className="h-5 w-5 text-[#40533d]" />
@@ -212,10 +206,10 @@ export function ShippingSelector() {
                 type="button"
                 onClick={() => handlePaymentSelect("card")}
                 className={cn(
-                  "flex items-center gap-2 rounded-xl border p-3 text-left transition",
+                  "flex items-center gap-2 border p-3 text-left transition",
                   cart.paymentMethod === "card"
-                    ? "border-[#40533d] bg-[#f4f7f2]"
-                    : "border-[#e4ebe3] hover:border-[#40533d]"
+                    ? "border-[#40533d] bg-white"
+                    : "border-rule bg-white hover:border-[#40533d]"
                 )}
               >
                 <CreditCardIcon className="h-5 w-5 text-[#40533d]" />
@@ -228,10 +222,10 @@ export function ShippingSelector() {
                 type="button"
                 onClick={() => handlePaymentSelect("transfer")}
                 className={cn(
-                  "flex items-center gap-2 rounded-xl border p-3 text-left transition",
+                  "flex items-center gap-2 border p-3 text-left transition",
                   cart.paymentMethod === "transfer"
-                    ? "border-[#40533d] bg-[#f4f7f2]"
-                    : "border-[#e4ebe3] hover:border-[#40533d]"
+                    ? "border-[#40533d] bg-white"
+                    : "border-rule bg-white hover:border-[#40533d]"
                 )}
                 disabled
               >

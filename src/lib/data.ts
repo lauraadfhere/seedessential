@@ -46,6 +46,8 @@ export type Product = {
   /** Cloudinary public ID (e.g. "tannelli/products/monstera-1"). Falls back
    * to the tint + monogram placeholder when unset. */
   image?: string;
+  /** Photo attribution text (required for CC BY / CC BY-SA images). */
+  imageCredit?: string;
   short: string;
   description: string;
   inStock: boolean;
@@ -68,6 +70,8 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 214,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/monstera-deliciosa",
+    imageCredit: "Peter A. Mansfeld / Wikimedia Commons, CC BY-SA 3.0 (https://commons.wikimedia.org/wiki/File:Monstera_deliciosa.jpg)",
     short: "The iconic split-leaf statement plant.",
     description:
       "A vigorous, easy-going tropical famous for its dramatic fenestrated leaves. Perfect for bright living rooms and a favourite of first-time plant parents.",
@@ -94,6 +98,8 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 341,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/snake-plant",
+    imageCredit: "Enzo Rippa / Wikimedia Commons, CC BY-SA 4.0 (https://commons.wikimedia.org/wiki/File:Sansevieria_Trifasciata_.jpg)",
     short: "Nearly indestructible low-light survivor.",
     description:
       "Architectural, upright and forgiving — the snake plant thrives on neglect and filters indoor air. Ideal for offices and low-light hallways.",
@@ -120,6 +126,8 @@ export const products: Product[] = [
     rating: 4.7,
     reviews: 96,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/olive-tree",
+    imageCredit: "Polymnia Si / Wikimedia Commons, Public domain (https://commons.wikimedia.org/wiki/File:Olea_europaea_tree.jpg)",
     short: "Evergreen symbol of warm, dry climates.",
     description:
       "A hardy, drought-tolerant evergreen that brings a Mediterranean feel to terraces and gardens. Produces fruit in warm, sunny positions.",
@@ -146,6 +154,8 @@ export const products: Product[] = [
     rating: 4.6,
     reviews: 512,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/cherry-tomato-seeds",
+    imageCredit: "Evan-Amos / Wikimedia Commons, CC0 1.0 (https://commons.wikimedia.org/wiki/File:Cherry-Tomatoes-in-Pack.jpg)",
     short: "Sweet, prolific balcony croppers.",
     description:
       "High-yield cherry tomato seeds ideal for balconies, raised beds and greenhouses. Reliable germination and continuous summer harvests.",
@@ -172,6 +182,8 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 178,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/lavender",
+    imageCredit: "Laslovarga / Wikimedia Commons, CC BY-SA 4.0 (https://commons.wikimedia.org/wiki/File:Lavandula_angustifolia_(17).jpg)",
     short: "Fragrant, pollinator-loving classic.",
     description:
       "Aromatic silvery foliage with purple summer spikes that bees adore. Thrives in poor, well-drained soil and full sun.",
@@ -197,6 +209,8 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 265,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/aloe-vera",
+    imageCredit: "Arjun01 / Wikimedia Commons, Public domain (https://commons.wikimedia.org/wiki/File:Potted_Aloe_vera_plant.jpg)",
     short: "Healing succulent, thrives on neglect.",
     description:
       "A practical, sculptural succulent whose gel soothes minor burns. Loves bright light and infrequent watering.",
@@ -222,6 +236,8 @@ export const products: Product[] = [
     rating: 4.7,
     reviews: 132,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/terracotta-planter-set",
+    imageCredit: "Lombroso / Wikimedia Commons, Public domain (https://commons.wikimedia.org/wiki/File:Flowerpot_1.jpg)",
     short: "Breathable classic pots in three sizes.",
     description:
       "A nested set of frost-resistant terracotta pots with drainage holes and saucers. Naturally breathable walls keep roots healthy.",
@@ -243,6 +259,8 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 401,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/organic-potting-mix",
+    imageCredit: "normanack / Wikimedia Commons, CC BY 2.0 (https://commons.wikimedia.org/wiki/File:Compost-dirt.jpg)",
     short: "Peat-free, nutrient-rich all-purpose mix.",
     description:
       "A balanced, peat-free blend of composted bark, coir and worm castings. Great drainage and a slow-release nutrient charge for 6 weeks.",
@@ -265,6 +283,8 @@ export const products: Product[] = [
     rating: 4.6,
     reviews: 87,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/drip-irrigation-kit",
+    imageCredit: "Dwight Sipler / Wikimedia Commons, CC BY 2.0 (https://commons.wikimedia.org/wiki/File:Drip_irrigation_(2552390830).jpg)",
     short: "Automatic watering for up to 20 pots.",
     description:
       "A plug-and-play drip system with a programmable timer, tubing and adjustable drippers. Save water and never miss a watering again.",
@@ -287,6 +307,8 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 223,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/pruning-shears",
+    imageCredit: "KVDP / Wikimedia Commons, Public domain (https://commons.wikimedia.org/wiki/File:Pruning_shears_removableblade.JPG)",
     short: "Sharp, ergonomic cuts every time.",
     description:
       "Japanese-steel bypass blades with a non-stick coating and cushioned grip for clean, effortless cuts on stems up to 20mm.",
@@ -308,6 +330,8 @@ export const products: Product[] = [
     rating: 4.7,
     reviews: 156,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/organic-fertilizer",
+    imageCredit: "Azorbli / Wikimedia Commons, CC BY-SA 4.0 (https://commons.wikimedia.org/wiki/File:Organic_Compost.jpg)",
     short: "Balanced feed for lush, healthy growth.",
     description:
       "A gentle organic NPK feed enriched with seaweed and mycorrhizae. Safe for edibles and won't burn roots.",
@@ -329,6 +353,8 @@ export const products: Product[] = [
     rating: 4.5,
     reviews: 74,
     tint: "from-neutral-100 to-neutral-200",
+    image: "tannelli/products/grow-light-panel",
+    imageCredit: "Sunshine 117 / Wikimedia Commons, CC BY-SA 3.0 (https://commons.wikimedia.org/wiki/File:Led_grown_lights_useful.jpg)",
     short: "Sunlight indoors for winter growing.",
     description:
       "An energy-efficient full-spectrum panel with a timer and adjustable height. Keep seedlings and indoor plants thriving year-round.",

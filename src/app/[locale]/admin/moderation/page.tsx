@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { RequireAuth } from "@/components/require-auth";
 import { Link } from "@/components/locale-link";
+import { AdminPageBar } from "@/components/header-parts";
 import { EmptyState, Notice, RequestCard, StatCard, Tabs, timeAgo } from "@/components/marketplace";
 import { api } from "@/lib/api-client";
 import { MODERATION_FLAG_LABELS } from "@/lib/moderation";
@@ -55,11 +56,11 @@ function ModerationDesk() {
 
   if (!queue) return <main className="network-surface section py-20 text-sm text-[#607060]">{notice || "Loading moderation queue…"}</main>;
 
-  const button = "rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-50";
+  const button = "px-3 py-2 text-xs font-bold disabled:opacity-50";
   return (
     <main className="network-surface min-h-screen py-10">
       <section className="section max-w-6xl space-y-6">
-        <Link href="/admin" className="text-sm font-bold text-[#40533d]">← Administration hub</Link>
+        <AdminPageBar />
         <div>
           <p className="text-xs font-bold uppercase tracking-brand text-[#638260]">Trust & safety</p>
           <h1 className="mt-2 text-3xl font-semibold">Marketplace moderation</h1>
@@ -115,10 +116,10 @@ function ModerationDesk() {
         {tab === "messages" && (queue.messages.length ? (
           <div className="space-y-3">
             {queue.messages.map((message) => (
-              <article key={message.id} className="network-card rounded-2xl p-5">
+              <article key={message.id} className="network-card p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#789078]">
                   <span><span className="font-semibold text-[#18231b]">{message.authorName}</span> ({message.authorRole}) · {timeAgo(message.createdAt)} · in <Link href={`/requests/${message.requestId}`} className="font-semibold text-[#40533d] underline">{message.requestTitle}</Link></span>
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 font-bold text-amber-900">{flagText(message.flags)}</span>
+                  <span className="border border-amber-200 bg-amber-100 px-2 py-0.5 font-bold text-amber-900">{flagText(message.flags)}</span>
                 </div>
                 <p className="mt-3 whitespace-pre-wrap text-sm">{message.body}</p>
                 <div className="mt-4 flex gap-2">
@@ -133,7 +134,7 @@ function ModerationDesk() {
         {tab === "reviews" && (queue.reviews.length ? (
           <div className="space-y-3">
             {queue.reviews.map((review) => (
-              <article key={review.id} className="network-card flex flex-wrap items-start justify-between gap-4 rounded-2xl p-5">
+              <article key={review.id} className="network-card flex flex-wrap items-start justify-between gap-4 p-5">
                 <div>
                   <p className="text-sm font-semibold text-amber-600">{"★".repeat(review.rating)} <span className="text-xs font-normal text-[#789078]">{review.author} → {review.expert} · {timeAgo(review.createdAt)}</span></p>
                   <p className="mt-2 text-sm">{review.body}</p>

@@ -51,9 +51,9 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: (next: P
     }
   }
 
-  const field = "mt-2 w-full rounded-xl border border-neutral-300 bg-white p-3 text-sm font-normal outline-none focus:border-[#40533d] focus:ring-2 focus:ring-[#40533d]/20";
+  const field = "mt-2 ui-field";
   return (
-    <form onSubmit={save} className="network-card grid gap-5 rounded-[1.5rem] p-6 lg:grid-cols-2">
+    <form onSubmit={save} className="network-card grid gap-5 p-6 lg:grid-cols-2">
       <div className="lg:col-span-2 flex items-center gap-4">
         <PhotoPicker value={avatar} onChange={(next) => setAvatar(next.slice(-1))} max={1} folder="experts" label="Profile photo" />
       </div>
@@ -76,7 +76,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: (next: P
       <label className="text-sm font-semibold lg:col-span-2">About your practice
         <textarea value={form.bio} onChange={(e) => set("bio")(e.target.value)} rows={4} maxLength={1500} className={field} />
       </label>
-      <label className="flex items-center justify-between gap-4 rounded-xl bg-[#f6f8f5] p-4 text-sm lg:col-span-2">
+      <label className="flex items-center justify-between gap-4 border border-rule bg-panel p-4 text-sm lg:col-span-2">
         <span><span className="font-semibold">Available for online consultations</span><span className="block text-xs text-[#607060]">Receive online requests from every wilaya, not only the ones you cover on site.</span></span>
         <input type="checkbox" checked={form.online} onChange={(e) => set("online")(e.target.checked)} className="h-5 w-5 accent-[#40533d]" />
       </label>
@@ -90,7 +90,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: (next: P
         </div>
         <div className="mt-3 flex max-h-48 flex-wrap gap-1.5 overflow-y-auto">
           {algeriaWilayas.map((wilaya) => (
-            <button type="button" key={wilaya.code} onClick={() => setCoverage((current) => (current.includes(wilaya.name) ? current.filter((item) => item !== wilaya.name) : [...current, wilaya.name]))} className={cn("rounded-full px-3 py-1.5 text-xs font-bold", coverage.includes(wilaya.name) ? "bg-[#40533d] text-white" : "border border-[#dce5dc] text-[#40533d]")}>
+            <button type="button" key={wilaya.code} onClick={() => setCoverage((current) => (current.includes(wilaya.name) ? current.filter((item) => item !== wilaya.name) : [...current, wilaya.name]))} className={cn("tmpl-chip", coverage.includes(wilaya.name) ? "!border-[#40533d] !bg-[#40533d] !text-white" : "")}>
               {wilaya.name}
             </button>
           ))}
@@ -98,7 +98,7 @@ function ProfileForm({ profile, onSaved }: { profile: Profile; onSaved: (next: P
       </div>
       {error && <div className="lg:col-span-2"><Notice tone="error">{error}</Notice></div>}
       <div className="flex items-center gap-4 lg:col-span-2">
-        <button disabled={saving} className="rounded-xl bg-[#40533d] px-6 py-3 text-sm font-bold text-white disabled:opacity-50">{saving ? "Saving…" : "Save profile"}</button>
+        <button disabled={saving} className="ui-btn disabled:opacity-50">{saving ? "Saving…" : "Save profile"}</button>
         {profile.status === "active" && <Link href={`/experts/${profile.slug}`} className="text-sm font-bold text-[#40533d]">View public profile →</Link>}
       </div>
     </form>
@@ -163,23 +163,22 @@ function ExpertStudio() {
   const verified = profile.status === "active";
   return (
     <main className="network-surface min-h-screen pb-16">
-      <section className="bg-[#263b2d] text-white">
-        <div className="section flex flex-wrap items-center justify-between gap-6 py-10">
+      <section className="tmpl-hero">
+        <div className="tmpl-rail flex flex-wrap items-center justify-between gap-6 py-9 sm:py-11">
           <div className="flex items-center gap-4">
             <Avatar src={profile.avatar} name={profile.name} className="h-16 w-16 text-lg ring-4 ring-white/15" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">Expert workspace</p>
-              <h1 className="mt-1 text-2xl font-semibold sm:text-3xl">{profile.name}</h1>
+              <h1 className="tmpl-hero-title">{profile.name}</h1>
               <p className="mt-1 text-sm text-white/70">{profile.professionalCategory} · {profile.location || "Algeria"} · ★ {profile.rating.toFixed(1)} ({profile.reviewsCount})</p>
             </div>
           </div>
-          <span className={cn("rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider", verified ? "bg-emerald-400/20 text-emerald-100" : profile.status === "rejected" ? "bg-red-400/20 text-red-100" : "bg-amber-400/20 text-amber-100")}>
+          <span className={cn("tmpl-chip border-0 px-4 py-2", verified ? "bg-emerald-400/20 text-emerald-100" : profile.status === "rejected" ? "bg-red-400/20 text-red-100" : "bg-amber-400/20 text-amber-100")}>
             {verified ? "Verified expert" : profile.status === "rejected" ? "Changes requested" : "Verification pending"}
           </span>
         </div>
       </section>
 
-      <div className="section mt-8 space-y-6">
+      <div className="tmpl-rail mt-8 space-y-6">
         {!verified && (
           <Notice tone={profile.status === "rejected" ? "error" : "info"}>
             {profile.status === "rejected"
@@ -207,7 +206,7 @@ function ExpertStudio() {
           <>
             <div className="flex flex-wrap gap-2">
               {[{ value: "", label: "All topics" }, ...REQUEST_CATEGORIES].map((item) => (
-                <button key={item.value} type="button" onClick={() => setTopic(item.value)} className={cn("rounded-full border px-3.5 py-1.5 text-xs font-bold", topic === item.value ? "border-[#40533d] bg-[#40533d] text-white" : "border-[#dce5dc] bg-white text-[#40533d]")}>{item.label}</button>
+                <button key={item.value} type="button" onClick={() => setTopic(item.value)} className={cn("tmpl-chip", topic === item.value ? "!border-[#40533d] !bg-[#40533d] !text-white" : "")}>{item.label}</button>
               ))}
             </div>
             {inbox.length ? (
@@ -215,9 +214,9 @@ function ExpertStudio() {
                 {inbox.map((request) => (
                   <RequestCard key={request.id} request={request} footer={
                     <div className="flex items-center gap-2">
-                      {request.preferredExpert && <span className="mr-auto rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">Sent to you</span>}
-                      <button disabled={busy === request.id} onClick={() => quick(request, "decline")} className="ml-auto rounded-lg px-3 py-2 text-xs font-bold text-[#607060] hover:bg-[#f1f5ef]">Pass</button>
-                      <button disabled={busy === request.id} onClick={() => quick(request, "accept")} className="rounded-lg bg-[#40533d] px-4 py-2 text-xs font-bold text-white disabled:opacity-50">{busy === request.id ? "…" : "Accept"}</button>
+                      {request.preferredExpert && <span className="tmpl-chip tmpl-chip-alert mr-auto">Sent to you</span>}
+                      <button disabled={busy === request.id} onClick={() => quick(request, "decline")} className="ml-auto px-3 py-2 text-xs font-bold text-[#607060] hover:bg-panel">Pass</button>
+                      <button disabled={busy === request.id} onClick={() => quick(request, "accept")} className="ui-btn !px-4 !py-2 !text-xs disabled:opacity-50">{busy === request.id ? "…" : "Accept"}</button>
                     </div>
                   } />
                 ))}

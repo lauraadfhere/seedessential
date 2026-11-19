@@ -1,6 +1,6 @@
 /** Client-safe vocabulary for disputes between growers, experts, sellers and Tannelli. */
 
-export type ClaimStatus = "awaiting_response" | "under_review" | "resolved" | "rejected" | "withdrawn";
+export type ClaimStatus = "open" | "in_review" | "resolved" | "rejected";
 export type ClaimSubject = "order" | "request" | "listing" | "expert";
 export type ClaimResolution = "claimant" | "respondent" | "split";
 export type ClaimParty = "claimant" | "respondent" | "admin";
@@ -29,11 +29,10 @@ export const CLAIM_REASONS: { value: string; label: string; subjects: ClaimSubje
 ];
 
 export const CLAIM_STATUS_META: Record<ClaimStatus, { label: string; tone: string }> = {
-  awaiting_response: { label: "Awaiting response", tone: "bg-amber-50 text-amber-900 ring-amber-200" },
-  under_review: { label: "Under review", tone: "bg-sky-50 text-sky-800 ring-sky-200" },
+  open: { label: "Received", tone: "bg-amber-50 text-amber-900 ring-amber-200" },
+  in_review: { label: "Under review", tone: "bg-sky-50 text-sky-800 ring-sky-200" },
   resolved: { label: "Resolved", tone: "bg-emerald-50 text-emerald-800 ring-emerald-200" },
   rejected: { label: "Closed — not upheld", tone: "bg-neutral-100 text-neutral-700 ring-neutral-200" },
-  withdrawn: { label: "Withdrawn", tone: "bg-neutral-100 text-neutral-600 ring-neutral-200" },
 };
 
 export const RESOLUTION_LABELS: Record<ClaimResolution, string> = {

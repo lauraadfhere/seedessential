@@ -25,11 +25,11 @@ export function ProductActions({ product }: { product: Product }) {
 
   return (
     <div className="mt-6 space-y-5">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center rounded-full border border-[#dce5dc] bg-white shadow-[0_8px_24px_rgb(24_35_27_/_0.06)]">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+        <div className="flex items-center border border-rule bg-white">
           <button
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="grid h-11 w-11 place-items-center rounded-full text-lg hover:bg-neutral-100"
+            className="grid h-11 w-11 place-items-center text-lg hover:bg-neutral-100"
             aria-label="Decrease quantity"
           >
             −
@@ -37,7 +37,7 @@ export function ProductActions({ product }: { product: Product }) {
           <span className="w-8 text-center font-semibold">{qty}</span>
           <button
             onClick={() => setQty((q) => q + 1)}
-            className="grid h-11 w-11 place-items-center rounded-full text-lg hover:bg-neutral-100"
+            className="grid h-11 w-11 place-items-center text-lg hover:bg-neutral-100"
             aria-label="Increase quantity"
           >
             +
@@ -47,7 +47,7 @@ export function ProductActions({ product }: { product: Product }) {
           href="/cart"
           variant="accent"
           size="lg"
-          className="flex-1"
+          className="order-last w-full sm:order-none sm:flex-1"
           onClick={(e) => {
             e.preventDefault();
             if (product.inStock) addProduct(product, qty);
@@ -56,7 +56,7 @@ export function ProductActions({ product }: { product: Product }) {
           {product.inStock ? `Add ${qty} to cart` : "Out of stock"}
         </Button>
         <button
-          className="grid h-12 w-12 place-items-center rounded-full border border-[#dce5dc] bg-white text-neutral-600 shadow-[0_8px_24px_rgb(24_35_27_/_0.06)] hover:border-foreground hover:text-foreground"
+          className="grid h-12 w-12 place-items-center border border-rule bg-white text-neutral-600 hover:border-foreground hover:text-foreground"
           aria-label="Add to wishlist"
         >
           <HeartIcon className="h-[18px] w-[18px]" />
@@ -71,15 +71,15 @@ export function ProductActions({ product }: { product: Product }) {
 function ProductTabs({ product }: { product: Product }) {
   const [tab, setTab] = useState<Tab>("Description");
   return (
-    <div className="network-card rounded-3xl">
-      <div className="flex gap-1 overflow-x-auto border-b border-neutral-200 p-2">
+    <div className="network-card">
+      <div className="flex gap-1 overflow-x-auto border-b border-rule p-2">
         {tabs.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={cn(
-              "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition",
-              tab === t ? "bg-foreground text-white" : "text-neutral-500 hover:bg-neutral-100",
+              "shrink-0 border px-4 py-2 text-sm font-medium transition",
+              tab === t ? "border-[#40533d] bg-[#40533d] text-white" : "border-transparent text-neutral-500 hover:bg-neutral-100",
             )}
           >
             {t}

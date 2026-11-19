@@ -150,7 +150,7 @@ function ProjectsBody() {
             {projects.map((project) => (
               <div key={project.id}>
               <Link href={`/projects/${project.id}`}>
-                <DeepCard hover className="rounded-[1.75rem] p-6 transition">
+                <DeepCard hover className="p-6 transition">
                   <div className="flex items-start justify-between">
                     <div>
                       <h2 className="font-semibold text-[#111]">{project.name}</h2>

@@ -62,7 +62,7 @@ export default function CartPage() {
           <p className="mt-2 max-w-xl text-sm leading-6 text-[#607060]">The cart groups plants and equipment, fills missing care items, and quotes Algeria delivery from your wilaya.</p>
 
           {cart.items.length === 0 ? (
-            <div className="network-card mt-8 rounded-[1.75rem] p-8 text-center">
+            <div className="network-card mt-8 p-8 text-center">
               <p className="font-semibold">Your cart is empty</p>
               <p className="mt-2 text-sm text-[#607060]">Add a plant and we will suggest the soil, pots and irrigation that belong with it.</p>
               <Button href="/shop" shape="rect" className="mt-6">Browse the shop</Button>
@@ -72,8 +72,8 @@ export default function CartPage() {
               {cart.items.map((item) => {
                 const product = catalogMatch(item.slug);
                 return (
-                  <li key={item.slug} className="network-card grid gap-4 overflow-hidden rounded-[1.5rem] p-4 sm:grid-cols-[6.5rem_1fr_auto] sm:items-center">
-                    <div className="aspect-square overflow-hidden rounded-2xl bg-[#eef3ed]">
+                  <li key={item.slug} className="network-card grid gap-4 overflow-hidden p-4 sm:grid-cols-[6.5rem_1fr_auto] sm:items-center">
+                    <div className="aspect-square overflow-hidden border border-rule bg-panel">
                       {product ? <ProductVisual product={{ ...product, image: item.image ?? product.image }} className="h-full" /> : null}
                     </div>
                     <div>
@@ -83,7 +83,7 @@ export default function CartPage() {
                       <Price value={item.price} dzd={item.priceDzd} className="mt-2 block" />
                     </div>
                     <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
-                      <div className="flex items-center rounded-full border border-[#dce5dc] bg-white">
+                      <div className="flex items-center border border-rule bg-white">
                         <button type="button" aria-label="Decrease" onClick={() => cart.updateQuantity(item.slug, item.quantity - 1)} className="grid h-9 w-9 place-items-center">−</button>
                         <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
                         <button type="button" aria-label="Increase" onClick={() => cart.updateQuantity(item.slug, item.quantity + 1)} className="grid h-9 w-9 place-items-center">+</button>
@@ -102,8 +102,8 @@ export default function CartPage() {
               <p className="mt-1 text-sm text-[#607060]">Matched to what is already in your cart so the kit arrives complete.</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {cart.suggestions.map((suggestion) => (
-                  <div key={suggestion.product.slug} className="network-card flex gap-3 rounded-2xl p-3">
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#eef3ed]">
+                  <div key={suggestion.product.slug} className="network-card flex gap-3 p-3">
+                    <div className="h-20 w-20 shrink-0 overflow-hidden border border-rule bg-panel">
                       <ProductVisual product={suggestion.product} className="h-full" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -125,33 +125,34 @@ export default function CartPage() {
         </div>
 
         <aside className="lg:sticky lg:top-28 lg:self-start">
-          <form onSubmit={checkout} className="network-card space-y-5 rounded-[1.75rem] p-6">
-            <h2 className="font-semibold">Algeria delivery</h2>
-            <label className="block text-xs font-semibold">
-              Deliver to wilaya
-              <select value={cart.wilaya} onChange={(event) => cart.setWilaya(event.target.value)} className="mt-1.5 w-full rounded-xl border bg-white px-3 py-2.5 text-sm font-normal">
-                {algeriaWilayas.map((wilaya) => (
-                  <option key={wilaya.code} value={wilaya.name}>{wilaya.name}</option>
-                ))}
-              </select>
-            </label>
-            
-            {/* Advanced shipping selector */}
-            <ShippingSelector />
-            
-            <dl className="space-y-2 border-t border-[#e4ebe3] pt-4 text-sm">
-              <div className="flex justify-between"><dt>Subtotal</dt><dd><Price value={cart.subtotal} dzd={cart.subtotalDzd} /></dd></div>
-              <div className="flex justify-between"><dt>Delivery</dt><dd>{cart.shipping === 0 ? "Free" : <Price value={cart.shipping} dzd={cart.shippingDzd} />}</dd></div>
-              <div className="flex justify-between text-base font-semibold"><dt>Total</dt><dd><Price value={cart.total} dzd={cart.subtotalDzd + cart.shippingDzd} /></dd></div>
-            </dl>
-            <button disabled={!cart.items.length || placing} className="w-full rounded-md bg-[#40533d] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-50">
-              {placing ? "Placing order…" : "Place order"}
-            </button>
-            <p className="text-[11px] leading-5 text-[#789078]">Sign in is required to place an order. Multiple couriers available with COD and home/stop-desk delivery options.</p>
+          <form onSubmit={checkout} className="tmpl-panel space-y-5">
+            <div className="tmpl-panel-head">Algeria delivery</div>
+            <div className="tmpl-panel-body space-y-5">
+              <label className="block text-xs font-semibold">
+                Deliver to wilaya
+                <select value={cart.wilaya} onChange={(event) => cart.setWilaya(event.target.value)} className="ui-field mt-1.5 text-sm font-normal">
+                  {algeriaWilayas.map((wilaya) => (
+                    <option key={wilaya.code} value={wilaya.name}>{wilaya.name}</option>
+                  ))}
+                </select>
+              </label>
+
+              <ShippingSelector />
+
+              <dl className="space-y-2 border-t border-rule pt-4 text-sm">
+                <div className="flex justify-between"><dt>Subtotal</dt><dd><Price value={cart.subtotal} dzd={cart.subtotalDzd} /></dd></div>
+                <div className="flex justify-between"><dt>Delivery</dt><dd>{cart.shipping === 0 ? "Free" : <Price value={cart.shipping} dzd={cart.shippingDzd} />}</dd></div>
+                <div className="flex justify-between text-base font-semibold"><dt>Total</dt><dd><Price value={cart.total} dzd={cart.subtotalDzd + cart.shippingDzd} /></dd></div>
+              </dl>
+              <button disabled={!cart.items.length || placing} className="w-full bg-[#40533d] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-50">
+                {placing ? "Placing order…" : "Place order"}
+              </button>
+              <p className="text-[11px] leading-5 text-[#789078]">Sign in is required to place an order. Multiple couriers available with COD and home/stop-desk delivery options.</p>
+            </div>
           </form>
           <div className="mt-4 space-y-3">
             {cart.tips.map((tip) => (
-              <div key={tip.id} className="network-card rounded-2xl p-4">
+              <div key={tip.id} className="network-card p-4">
                 <p className="text-sm font-semibold">{tip.title}</p>
                 <p className="mt-1 text-xs leading-5 text-[#607060]">{tip.text}</p>
                 {tip.href && <Link href={tip.href} className="mt-2 inline-block text-xs font-bold text-[#40533d]">Open →</Link>}

@@ -1,16 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/components/locale-link";
-import { quizSteps, products } from "@/lib/data";
+import { quizSteps, type Product } from "@/lib/data";
 import { ProductCard } from "@/components/product-card";
 import { Button, cn } from "@/components/ui";
 import { useCart } from "@/components/cart-provider";
+import { mergeLiveCatalog } from "@/lib/catalog";
+import { useSearchHistory, normalizeSearchTerm } from "@/lib/search-history";
+
+function matchesQuery(p: Product, query: string) {
+  const q = query.toLowerCase();
+  return `${p.name} ${p.short} ${p.description} ${p.category}`.toLowerCase().includes(q);
+}
 
 export default function DiscoverPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
+  const [query, setQuery] = useState("");
+  const [catalog, setCatalog] = useState<Product[] | null>(null);
+  const { history, remember, forget, clear } = useSearchHistory();
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/catalog/products", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : []))
+      .then((data: Product[]) => {
+        if (active) setCatalog(data);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const liveProducts = useMemo(() => mergeLiveCatalog(catalog), [catalog]);
+  const searchResults = useMemo(() => {
+    const term = normalizeSearchTerm(query);
+    if (!term) return [];
+    return liveProducts.filter((p) => matchesQuery(p, term)).slice(0, 12);
+  }, [query, liveProducts]);
+
+  function submitSearch(term: string) {
+    const clean = normalizeSearchTerm(term);
+    if (!clean) return;
+    setQuery(clean);
+    remember(clean);
+  }
 
   const current = quizSteps[step];
 
@@ -31,7 +68,7 @@ export default function DiscoverPage() {
   }
 
   // Simple scoring: recommend plants matching goal/location heuristics.
-  const recommendations = recommend(answers);
+  const recommendations = useMemo(() => recommend(answers, liveProducts), [answers, liveProducts]);
   const { addProducts } = useCart();
 
   return (
@@ -48,6 +85,71 @@ export default function DiscoverPage() {
           your space, light and goal.
         </p>
       </div>
+
+      <form
+        role="search"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitSearch(query);
+        }}
+        className="mx-auto mt-8 max-w-2xl"
+      >
+        <label htmlFor="discover-search" className="sr-only">Search plants and equipment</label>
+        <div className="ui-field flex items-center gap-2 !py-0">
+          <input
+            id="discover-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            maxLength={80}
+            placeholder="Search plants & equipment"
+            className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400"
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery("")} className="text-xs font-semibold text-neutral-500 hover:text-foreground">
+              Clear
+            </button>
+          )}
+          <button type="submit" className="border border-[#40533d] bg-[#40533d] px-4 py-1.5 text-xs font-semibold text-white">
+            Search
+          </button>
+        </div>
+        {history.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-neutral-500">Recent:</span>
+            {history.map((term) => (
+              <span key={term} className="inline-flex items-center border border-rule bg-white">
+                <button type="button" onClick={() => submitSearch(term)} className="px-3 py-1 hover:text-accent-strong">
+                  {term}
+                </button>
+                <button type="button" aria-label={`Remove ${term}`} onClick={() => forget(term)} className="pr-2 text-neutral-400 hover:text-foreground">
+                  ×
+                </button>
+              </span>
+            ))}
+            <button type="button" onClick={clear} className="font-semibold text-neutral-500 underline hover:text-foreground">
+              Clear history
+            </button>
+          </div>
+        )}
+        {query.trim() && (
+          <div className="mt-6">
+            <p className="text-sm text-neutral-500">
+              {searchResults.length} result{searchResults.length !== 1 && "s"} for &ldquo;{normalizeSearchTerm(query) ?? query}&rdquo;
+            </p>
+            {searchResults.length > 0 ? (
+              <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {searchResults.map((p) => (
+                  <ProductCard key={p.slug} product={p} />
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 border border-dashed border-rule p-6 text-center text-sm text-neutral-500">
+                No match. Try another word, or take the quiz below.
+              </p>
+            )}
+          </div>
+        )}
+      </form>
 
       {!done ? (
         <div className="mx-auto mt-10 max-w-2xl">
@@ -66,7 +168,7 @@ export default function DiscoverPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-neutral-200 bg-white p-8">
+          <div className="network-card p-8">
             <h2 className="text-2xl font-semibold">{current.question}</h2>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {current.options.map((opt) => (
@@ -74,10 +176,10 @@ export default function DiscoverPage() {
                   key={opt.value}
                   onClick={() => choose(opt.value)}
                   className={cn(
-                    "rounded-xl border p-4 text-left font-medium transition hover:border-foreground",
+                    "border p-4 text-left font-medium transition hover:border-[#40533d]",
                     answers[current.id] === opt.value
-                      ? "border-foreground bg-neutral-50"
-                      : "border-neutral-200",
+                      ? "border-[#40533d] bg-panel"
+                      : "border-rule",
                   )}
                 >
                   {opt.label}
@@ -97,7 +199,7 @@ export default function DiscoverPage() {
         </div>
       ) : (
         <div className="mx-auto mt-10 max-w-4xl">
-          <div className="rounded-3xl bg-black p-8 text-white">
+          <div className="border border-[#18231b] bg-black p-8 text-white">
             <p className="text-xs font-bold uppercase tracking-brand text-neutral-400">
               Your personalised solution
             </p>
@@ -128,7 +230,7 @@ export default function DiscoverPage() {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button href="#" variant="outline" shape="rect" onClick={reset}>
+            <Button href="/discover" variant="outline" shape="rect" onClick={(event) => { event.preventDefault(); reset(); }}>
               Start over
             </Button>
             <Link
@@ -144,11 +246,11 @@ export default function DiscoverPage() {
   );
 }
 
-function recommend(answers: Record<string, string>) {
+function recommend(answers: Record<string, string>, catalog: Product[]) {
   const goal = answers.goal;
   const location = answers.location;
 
-  let list = [...products].filter((p) => p.inStock);
+  let list = [...catalog].filter((p) => p.inStock);
 
   if (goal === "food" || goal === "fruit") {
     list = list.filter(
@@ -171,6 +273,6 @@ function recommend(answers: Record<string, string>) {
   }
 
   // Ensure at least a plant + a few equipment items are present.
-  const chosen = list.length >= 4 ? list : products.filter((p) => p.inStock);
+  const chosen = list.length >= 4 ? list : catalog.filter((p) => p.inStock);
   return chosen.slice(0, 8);
 }

@@ -124,8 +124,8 @@ export function RichEditor({
           {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
-      <div className={cn("overflow-hidden rounded-md border border-neutral-300 bg-white transition-all focus-within:border-[#40533d] focus-within:ring-2 focus-within:ring-[#40533d]/20", error && "border-red-300", disabled && "opacity-60")}>
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-[#f7faf6] px-2 py-1.5">
+      <div className={cn("overflow-hidden border border-rule bg-white transition-all focus-within:border-[#40533d]", error && "border-red-300", disabled && "opacity-60")}>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule bg-panel-head px-2 py-1.5">
           <div className="flex flex-wrap items-center gap-0.5">
             {TOOLS.map((tool) => (
               <button
@@ -135,19 +135,19 @@ export function RichEditor({
                 aria-label={tool.title}
                 disabled={disabled || tab === "preview"}
                 onClick={() => apply(tool)}
-                className="grid h-7 min-w-7 place-items-center rounded px-1.5 text-xs font-bold text-neutral-700 hover:bg-[#40533d]/10 disabled:opacity-40"
+                className="grid h-7 min-w-7 place-items-center px-1.5 text-xs font-bold text-neutral-700 hover:bg-[#40533d]/10 disabled:opacity-40"
               >
                 {tool.label}
               </button>
             ))}
           </div>
-          <div className="flex rounded-md bg-white p-0.5 text-xs font-semibold ring-1 ring-neutral-200">
+          <div className="flex border border-rule bg-white p-0.5 text-xs font-semibold">
             {(["write", "preview"] as const).map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => setTab(item)}
-                className={cn("rounded px-2.5 py-1 capitalize", tab === item ? "bg-[#40533d] text-white" : "text-[#40533d]")}
+                className={cn("px-2.5 py-1 capitalize", tab === item ? "bg-[#40533d] text-white" : "text-[#40533d]")}
               >
                 {item}
               </button>
@@ -169,11 +169,11 @@ export function RichEditor({
           />
         ) : (
           <div
-            className="prose-sm min-h-[8rem] space-y-2 px-4 py-3 text-sm leading-6 text-neutral-800 [&_a]:text-[#40533d] [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#b8c6b6] [&_blockquote]:pl-3 [&_code]:rounded [&_code]:bg-neutral-100 [&_code]:px-1 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-neutral-100 [&_pre]:p-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+            className="prose-sm min-h-[8rem] space-y-2 px-4 py-3 text-sm leading-6 text-neutral-800 [&_a]:text-[#40533d] [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-rule [&_blockquote]:pl-3 [&_code]:bg-panel [&_code]:px-1 [&_pre]:overflow-x-auto [&_pre]:bg-panel [&_pre]:p-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
             dangerouslySetInnerHTML={{ __html: value.trim() ? renderMarkdown(value) : `<p class="text-neutral-400">Nothing to preview yet.</p>` }}
           />
         )}
-        <div className="flex justify-between border-t border-neutral-200 bg-[#f7faf6] px-3 py-1.5 text-[11px] text-[#789078]">
+        <div className="flex justify-between border-t border-rule bg-panel-head px-3 py-1.5 text-[11px] text-[#789078]">
           <span>Markdown supported: **bold**, *italic*, `code`, lists, &gt; quotes</span>
           {maxLength && <span>{value.length}/{maxLength}</span>}
         </div>

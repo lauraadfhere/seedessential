@@ -6,7 +6,6 @@ import { MESSAGE_CLASS, REQUEST_CLASS, getExpertProfile, roleOf } from "./market
 import { buildAccountProfile, ensureBusiness } from "./accounts";
 import { expertTrust, providerTrust, type TrustReport } from "@/lib/trust";
 
-export const CLAIM_CLASS = "Claim";
 export const ORDER_CLASS = "Order";
 
 function persist(target: Parse.Object, report: TrustReport) {
@@ -20,14 +19,9 @@ function persist(target: Parse.Object, report: TrustReport) {
   return target.save(null, { useMasterKey: true });
 }
 
-async function claimCounts(user: Parse.User) {
-  const Parse = getParseAdmin();
-  const against = () => new Parse.Query(CLAIM_CLASS).equalTo("respondent", user);
-  const [upheld, open] = await Promise.all([
-    against().equalTo("status", "resolved").equalTo("resolution", "claimant").count({ useMasterKey: true }),
-    against().containedIn("status", ["open", "awaiting_response", "under_review"]).count({ useMasterKey: true }),
-  ]);
-  return { upheld, open };
+/** Complaints (`Complaint` class) do not yet link to a respondent account, so no claims can be attributed to a provider. */
+async function claimCounts(_user: Parse.User) {
+  return { upheld: 0, open: 0 };
 }
 
 function median(values: number[]) {

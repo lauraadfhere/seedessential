@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getParse } from "@/lib/parse/client";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui";
@@ -25,14 +25,13 @@ export function RequireAuth({
 }: RequireAuthProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { locale } = useI18n();
   const [state, setState] = useState<"loading" | "allowed" | "forbidden">("loading");
 
   useEffect(() => {
     const user = getParse().User.current();
     if (!user) {
-      const query = searchParams.toString();
+      const query = window.location.search.replace(/^\?/, "");
       const next = `${pathname}${query ? `?${query}` : ""}`;
       router.replace(`/${locale}/sign-in?next=${encodeURIComponent(next)}`);
       return;
@@ -43,7 +42,7 @@ export function RequireAuth({
       return;
     }
     setState("allowed");
-  }, [locale, pathname, roles, router, searchParams]);
+  }, [locale, pathname, roles, router]);
 
   if (state === "loading") {
     return (

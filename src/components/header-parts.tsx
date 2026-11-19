@@ -82,8 +82,59 @@ export function NotificationBell({ account, summary, className }: { account: Acc
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-5 w-5" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16ZM10 20a2 2 0 0 0 4 0" />
       </svg>
-      {count > 0 && <span className="absolute right-1 top-1 grid min-w-[1.1rem] place-items-center rounded-full bg-amber-400 px-1 text-[10px] font-bold leading-[1.1rem] text-[#263b2d] ring-2 ring-[#40533d]">{count > 99 ? "99+" : count}</span>}
+      {count > 0 && <span className="absolute right-1 top-1 grid min-w-[1.1rem] place-items-center rounded-full bg-amber-400 px-1 text-[11px] font-bold leading-[1.1rem] text-[#263b2d] ring-2 ring-[#40533d]">{count > 99 ? "99+" : count}</span>}
     </Link>
+  );
+}
+
+/** Clears the Parse session and returns to the locale home. */
+export async function signOutAccount(locale: string, onSignedOut?: () => void) {
+  await getParse().User.logOut().catch(() => undefined);
+  window.dispatchEvent(new Event("tannelli:auth"));
+  onSignedOut?.();
+}
+
+/** Standalone logout for dashboards/admin shells that hide the site header. */
+export function SignOutButton({
+  className,
+  onSignedOut,
+  tone = "plain",
+}: {
+  className?: string;
+  onSignedOut?: () => void;
+  tone?: "plain" | "sidebar" | "link";
+}) {
+  const { locale, t } = useI18n();
+  const router = useRouter();
+  const styles =
+    tone === "sidebar"
+      ? "w-full border border-white/20 bg-white/8 px-3 py-2.5 text-left text-sm font-semibold text-white/85 transition hover:bg-white/15 hover:text-white"
+      : tone === "link"
+        ? "mx-2 text-xs text-link hover:underline"
+        : "border border-rule bg-white px-3 py-1.5 text-sm font-semibold text-[#40533d] transition hover:bg-[#f6f8f5]";
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        void signOutAccount(locale, onSignedOut).then(() => router.push(`/${locale}`));
+      }}
+      className={cn(styles, className)}
+    >
+      {t("account.signOut")}
+    </button>
+  );
+}
+
+/** Compact hub + logout bar for admin subpages without AdminShell. */
+export function AdminPageBar() {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <Link href="/admin" className="text-sm font-bold text-[#40533d]">
+        ← Administration hub
+      </Link>
+      <SignOutButton />
+    </div>
   );
 }
 
@@ -123,17 +174,22 @@ export function AccountMenu({ account, summary, onSignedOut, size = "md" }: { ac
         <div role="menu" className="absolute right-0 top-full z-30 mt-3 w-64 overflow-hidden rounded-2xl border border-[#dce5dc] bg-[#fbfdf9] p-2 text-sm text-neutral-900 shadow-[0_20px_55px_rgb(24_35_27_/_0.24)] rtl:left-0 rtl:right-auto">
           <div className="mb-2 rounded-xl bg-[#40533d] px-3 py-3 text-white">
             <p className="truncate font-semibold">{account.name}</p>
-            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/65">{audienceLabel(account.role, account.accountKind)} account</p>
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white/65">{audienceLabel(account.role, account.accountKind)} account</p>
           </div>
           {links.map((link) => (
             <Link key={link.href + link.label} href={link.href} onClick={() => setOpen(false)} role="menuitem" className="flex items-center justify-between rounded-xl px-3 py-2.5 font-medium hover:bg-[#eaf0e8]">
               {link.label}
-              {"badge" in link && link.badge ? <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-[#263b2d]">{link.badge}</span> : null}
+              {"badge" in link && link.badge ? <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[11px] font-bold text-[#263b2d]">{link.badge}</span> : null}
             </Link>
           ))}
           <button
             role="menuitem"
-            onClick={() => { void getParse().User.logOut(); window.dispatchEvent(new Event("tannelli:auth")); onSignedOut(); setOpen(false); router.push(`/${locale}`); }}
+            onClick={() => {
+              void signOutAccount(locale, () => {
+                onSignedOut();
+                setOpen(false);
+              }).then(() => router.push(`/${locale}`));
+            }}
             className="mt-2 block w-full rounded-xl border-t border-[#dce5dc] px-3 py-2.5 text-left font-medium text-red-700 hover:bg-red-50"
           >
             {t("account.signOut")}

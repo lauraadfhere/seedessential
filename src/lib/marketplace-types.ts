@@ -51,7 +51,7 @@ export const STATUS_META: Record<RequestStatus, { label: string; tone: string; s
   rejected: { label: "Not accepted", tone: "bg-red-50 text-red-700 ring-red-200", step: -1 },
 };
 
-export const STATUS_STEPS = ["Submitted", "Open", "Expert assigned", "Recommendation", "Completed"];
+export const STATUS_STEPS = ["Moderation", "Open", "Expert assigned", "Recommendation", "Completed"];
 
 export function categoryLabel(value?: string) {
   return REQUEST_CATEGORIES.find((item) => item.value === value)?.label ?? value ?? "General";

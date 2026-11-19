@@ -170,7 +170,7 @@ export default function ProviderPage() {
     <main className="network-surface">
       <PageHero eyebrow="Equipment providers" title="Your equipment list" text="Add the tools, soil, irrigation and care products you supply. Choose the Algerian wilayas you sell from and deliver to — Tannelli reviews every listing before shoppers can see it." />
       <section className="section py-10">
-        {notice && <p className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
+        {notice && <p className="mb-6 border border-rule bg-panel px-4 py-3 text-sm text-[#40533d]">{notice}</p>}
         {insights && (
           <div className="mb-8 grid gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
             {[
@@ -179,39 +179,39 @@ export default function ProviderPage() {
               { label: "Grower demand · 30 days", value: insights.totals.demand30d, hint: "Requests in your delivery wilayas" },
               { label: "Top recommended", value: insights.products[0]?.recommendations ? insights.products[0].name : "—", hint: insights.products[0]?.recommendations ? `${insights.products[0].recommendations} recommendations` : "Not yet recommended" },
             ].map((card, index) => (
-              <div key={card.label} className={`rounded-2xl border p-5 ${index === 1 ? "border-[#40533d] bg-[#40533d] text-white" : "border-[#e3e9e1] bg-white"}`}>
+              <div key={card.label} className={`tmpl-panel p-5 ${index === 1 ? "!border-[#40533d] !bg-[#40533d] text-white" : ""}`}>
                 <p className={`text-xs font-bold uppercase tracking-[0.14em] ${index === 1 ? "text-white/70" : "text-[#7d8a7b]"}`}>{card.label}</p>
                 <p className="mt-3 truncate text-2xl font-semibold">{card.value}</p>
                 <p className={`mt-1 text-sm ${index === 1 ? "text-white/75" : "text-[#607060]"}`}>{card.hint}</p>
               </div>
             ))}
-            <div className="network-card grid gap-6 rounded-[1.5rem] p-5 sm:grid-cols-2 lg:col-span-4">
+            <div className="network-card grid gap-6 p-5 sm:grid-cols-2 lg:col-span-4">
               <DemandBars title="Where growers need help" rows={insights.demandByWilaya} />
               <DemandBars title="What they ask about" rows={insights.demandByTopic} />
             </div>
           </div>
         )}
-        <form onSubmit={createListing} className="network-card grid gap-3 rounded-[1.75rem] p-5 sm:grid-cols-2 lg:grid-cols-6">
-          <label className="text-xs font-semibold lg:col-span-2">Equipment name<input required value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
+        <form onSubmit={createListing} className="network-card grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-6">
+          <label className="text-xs font-semibold lg:col-span-2">Equipment name<input required value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className="mt-1 ui-field" /></label>
           <label className="text-xs font-semibold">Category
-            <select value={form.category} onChange={(e) => setForm((current) => ({ ...current, category: e.target.value }))} className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm font-normal">
+            <select value={form.category} onChange={(e) => setForm((current) => ({ ...current, category: e.target.value }))} className="mt-1 ui-field">
               {equipmentCategories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
             </select>
           </label>
-          <label className="text-xs font-semibold">USD<input required type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
-          <label className="text-xs font-semibold">DZD<input type="number" min="0" value={form.priceDZD} onChange={(e) => setForm((current) => ({ ...current, priceDZD: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
+          <label className="text-xs font-semibold">USD<input required type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} className="mt-1 ui-field" /></label>
+          <label className="text-xs font-semibold">DZD<input type="number" min="0" value={form.priceDZD} onChange={(e) => setForm((current) => ({ ...current, priceDZD: e.target.value }))} className="mt-1 ui-field" /></label>
           <label className="text-xs font-semibold">Ships from
-            <select value={form.originWilaya} onChange={(e) => setForm((current) => ({ ...current, originWilaya: e.target.value }))} className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm font-normal">
+            <select value={form.originWilaya} onChange={(e) => setForm((current) => ({ ...current, originWilaya: e.target.value }))} className="mt-1 ui-field">
               {algeriaWilayas.map((wilaya) => <option key={wilaya.code} value={wilaya.name}>{wilaya.name}</option>)}
             </select>
           </label>
-          <label className="text-xs font-semibold sm:col-span-2 lg:col-span-5">Short description<input value={form.short} onChange={(e) => setForm((current) => ({ ...current, short: e.target.value }))} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-normal" /></label>
+          <label className="text-xs font-semibold sm:col-span-2 lg:col-span-5">Short description<input value={form.short} onChange={(e) => setForm((current) => ({ ...current, short: e.target.value }))} className="mt-1 ui-field" /></label>
           <div className="sm:col-span-2 lg:col-span-6">
             <p className="text-xs font-semibold">Deliver to wilayas</p>
             <p className="mt-1 text-[11px] text-[#607060]">{algeriaDeliveryNote} Same coverage model as experts.</p>
             <div className="mt-2 flex max-h-36 flex-wrap gap-1.5 overflow-y-auto">
               {algeriaWilayas.map((wilaya) => (
-                <button type="button" key={wilaya.code} onClick={() => setCoverage((current) => current.includes(wilaya.name) ? current.filter((item) => item !== wilaya.name) : [...current, wilaya.name])} className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${coverage.includes(wilaya.name) ? "bg-[#40533d] text-white" : "border border-[#dce5dc] text-[#40533d]"}`}>
+                <button type="button" key={wilaya.code} onClick={() => setCoverage((current) => current.includes(wilaya.name) ? current.filter((item) => item !== wilaya.name) : [...current, wilaya.name])} className={`tmpl-chip ${coverage.includes(wilaya.name) ? "!border-[#40533d] !bg-[#40533d] !text-white" : ""}`}>
                   {wilaya.name}
                 </button>
               ))}
@@ -221,19 +221,19 @@ export default function ProviderPage() {
         </form>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {items.map((item) => (
-            <article key={item.slug} className="network-card overflow-hidden rounded-[1.75rem]">
+            <article key={item.slug} className="network-card overflow-hidden">
               <div className="grid sm:grid-cols-[8rem_1fr]">
-                <div className="aspect-square bg-[#eef3ed]">
+                <div className="aspect-square border-r border-rule bg-panel">
                   {item.images[0] ? <img src={cloudinaryImage(item.images[0], { width: 320, height: 320 })} alt="" className="h-full w-full object-cover" /> : null}
                 </div>
                 <div className="p-5">
-                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${item.visibilityStatus === "published" ? "bg-emerald-50 text-emerald-800" : item.visibilityStatus === "pending" ? "bg-amber-50 text-amber-800" : "bg-red-50 text-red-700"}`}>{item.visibilityStatus === "published" ? "Visible in shop" : item.visibilityStatus === "pending" ? "Waiting for Tannelli" : "Not accepted"}</span>
+                  <span className={`tmpl-chip ${item.visibilityStatus === "published" ? "tmpl-chip-ok" : item.visibilityStatus === "pending" ? "tmpl-chip-alert" : "tmpl-chip-alert"}`}>{item.visibilityStatus === "published" ? "Visible in shop" : item.visibilityStatus === "pending" ? "Waiting for Tannelli" : "Not accepted"}</span>
                   <h2 className="mt-3 font-semibold">{item.name}</h2>
                   <p className="mt-1 text-sm text-[#607060]">{item.short || "No description yet."}</p>
                   <p className="mt-2 text-sm font-semibold">${item.price}{item.priceDzd ? ` · ${item.priceDzd} DZD` : ""}</p>
                   {item.originWilaya && <p className="mt-1 text-xs text-[#789078]">Ships from {item.originWilaya}{(item.coverageWilayas?.length ?? 0) > 0 ? ` · ${item.coverageWilayas?.length} wilayas` : ""}</p>}
                   {(recommendationsBySlug.get(item.slug)?.recommendations ?? 0) > 0 && (
-                    <p className="mt-2 rounded-lg bg-[#eaf0e8] px-2.5 py-1.5 text-xs font-semibold text-[#263b2d]">
+                    <p className="mt-2 border border-rule bg-panel px-2.5 py-1.5 text-xs font-semibold text-[#263b2d]">
                       ✦ Recommended {recommendationsBySlug.get(item.slug)!.recommendations}× by {recommendationsBySlug.get(item.slug)!.experts.join(", ") || "experts"}
                     </p>
                   )}

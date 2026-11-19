@@ -272,7 +272,7 @@ function ProjectDetailBody() {
                         {pendingTasks.map((task) => (
                           <div
                             key={task.id}
-                            className="flex items-start gap-3 rounded-xl bg-[#f8faf8] p-3"
+                            className="flex items-start gap-3 border border-rule bg-[#f8faf8] p-3"
                           >
                             <input
                               type="checkbox"
@@ -306,7 +306,7 @@ function ProjectDetailBody() {
                         {completedTasks.map((task) => (
                           <div
                             key={task.id}
-                            className="flex items-start gap-3 rounded-xl bg-[#eef3ed] p-3 opacity-75"
+                            className="flex items-start gap-3 border border-rule bg-[#eef3ed] p-3 opacity-75"
                           >
                             <input
                               type="checkbox"

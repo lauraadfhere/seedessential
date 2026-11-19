@@ -30,24 +30,30 @@ export function Avatar({ src, name, className }: { src?: string; name: string; c
 
 export function StatusPill({ status, className }: { status: RequestStatus; className?: string }) {
   const meta = STATUS_META[status] ?? STATUS_META.submitted;
-  return <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset", meta.tone, className)}><span className="h-1.5 w-1.5 rounded-full bg-current" />{meta.label}</span>;
+  return <span className={cn("tmpl-chip inline-flex items-center gap-1.5 !rounded-none ring-1 ring-inset", meta.tone, className)}><span className="h-1.5 w-1.5 bg-current" />{meta.label}</span>;
 }
 
 export function UrgencyTag({ urgency }: { urgency: string }) {
   if (urgency === "normal") return null;
   const label = URGENCY_LEVELS.find((item) => item.value === urgency)?.label ?? urgency;
-  return <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", urgency === "urgent" ? "bg-red-600 text-white" : "bg-amber-100 text-amber-900")}>{label}</span>;
+  return <span className={cn("tmpl-chip !rounded-none", urgency === "urgent" ? "tmpl-chip-alert !bg-red-600 !text-white !border-red-600" : "bg-amber-100 text-amber-900")}>{label}</span>;
 }
 
 export function StatusTimeline({ status }: { status: RequestStatus }) {
   const step = STATUS_META[status]?.step ?? 0;
-  if (step < 0) return null;
+  if (step < 0) {
+    return (
+      <p className="text-xs font-semibold text-[#607060]">
+        {status === "rejected" ? "This request was not published. See the moderation note for next steps." : "This request was cancelled and is no longer visible to experts."}
+      </p>
+    );
+  }
   return (
     <ol className="grid grid-cols-5 gap-1.5" aria-label="Request progress">
       {STATUS_STEPS.map((label, index) => (
         <li key={label} className="min-w-0">
           <span className={cn("block h-1.5 rounded-full", index <= step ? "bg-[#40533d]" : "bg-[#dce5dc]")} />
-          <span className={cn("mt-1.5 block truncate text-[10px] font-semibold uppercase tracking-wide", index <= step ? "text-[#263b2d]" : "text-[#9aa79a]")}>{label}</span>
+          <span className={cn("mt-1.5 block truncate text-[11px] font-semibold uppercase tracking-wide", index <= step ? "text-[#263b2d]" : "text-[#9aa79a]")}>{label}</span>
         </li>
       ))}
     </ol>
@@ -130,16 +136,16 @@ export function PhotoPicker({
       {hint && !compact && <p className="mt-1 text-xs leading-5 text-[#789078]">{hint}</p>}
       <div className={cn("flex flex-wrap gap-2", !compact && "mt-3")}>
         {value.map((photo) => (
-          <div key={photo} className={cn("group relative overflow-hidden rounded-xl border border-[#dce5dc] bg-[#eef3ed]", compact ? "h-14 w-14" : "h-24 w-24")}>
+          <div key={photo} className={cn("group relative overflow-hidden border border-rule bg-panel", compact ? "h-14 w-14" : "h-24 w-24")}>
             <img src={mediaUrl(photo, 200)} alt="" className="h-full w-full object-cover" />
             <button type="button" onClick={() => onChange(value.filter((item) => item !== photo))} aria-label="Remove photo" className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/65 text-xs font-bold text-white opacity-90 hover:bg-red-600">×</button>
           </div>
         ))}
         {Array.from({ length: busy }).map((_, index) => (
-          <div key={`busy-${index}`} className={cn("grid animate-pulse place-items-center rounded-xl bg-[#e3ebe1] text-[10px] font-bold text-[#607060]", compact ? "h-14 w-14" : "h-24 w-24")}>Uploading</div>
+          <div key={`busy-${index}`} className={cn("grid animate-pulse place-items-center border border-rule bg-panel text-[11px] font-bold text-[#607060]", compact ? "h-14 w-14" : "h-24 w-24")}>Uploading</div>
         ))}
         {value.length + busy < max && (
-          <button type="button" onClick={() => input.current?.click()} className={cn("grid place-items-center rounded-xl border-2 border-dashed border-[#b8c6b6] text-[#40533d] transition hover:border-[#40533d] hover:bg-[#f3f7f1]", compact ? "h-14 w-14 text-xl" : "h-24 w-24 text-xs font-bold")}>
+          <button type="button" onClick={() => input.current?.click()} className={cn("grid place-items-center border-2 border-dashed border-rule text-[#40533d] transition hover:border-[#40533d] hover:bg-[#f3f7f1]", compact ? "h-14 w-14 text-xl" : "h-24 w-24 text-xs font-bold")}>
             {compact ? "+" : <span className="text-center"><span className="block text-2xl leading-none">+</span>Add photo</span>}
           </button>
         )}
@@ -161,43 +167,47 @@ export function timeAgo(value?: string) {
 /** Marketplace-style listing card used by growers, experts and admins. */
 export function RequestCard({ request, footer }: { request: RequestRecord; footer?: ReactNode }) {
   return (
-    <article className="network-card network-card-hover group flex flex-col overflow-hidden rounded-[1.5rem]">
+    <article className="network-card network-card-hover group flex flex-col overflow-hidden">
+      <div className="tmpl-list-head !py-2.5 text-[12px] font-semibold uppercase tracking-wide text-[#5a6b58]">
+        {categoryLabel(request.category)} · {request.mode === "onsite" ? "On site" : "Online"}
+      </div>
       <Link href={`/requests/${request.id}`} className="flex flex-1 flex-col">
-        <div className="relative aspect-[16/7] bg-gradient-to-br from-[#eaf0e8] to-[#d9e5d6]">
+        <div className="relative aspect-[16/7] border-b border-rule bg-panel">
           {request.photos[0] ? (
             <img src={mediaUrl(request.photos[0], 640)} alt="" className="h-full w-full object-cover" />
           ) : (
             <span className="absolute inset-0 grid place-items-center text-xs font-bold uppercase tracking-[0.2em] text-[#7d917a]">{categoryLabel(request.category)}</span>
           )}
-          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5"><StatusPill status={request.status} className="bg-white/95" /><UrgencyTag urgency={request.urgency} /></div>
-          {request.photos.length > 1 && <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white">+{request.photos.length - 1} photos</span>}
+          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5"><StatusPill status={request.status} className="!bg-white" /><UrgencyTag urgency={request.urgency} /></div>
+          {request.photos.length > 1 && <span className="tmpl-chip absolute bottom-3 right-3 !border-0 !bg-black/65 !text-white">+{request.photos.length - 1} photos</span>}
         </div>
-        <div className="flex flex-1 flex-col p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#638260]">{categoryLabel(request.category)} · {request.mode === "onsite" ? "On site" : "Online"}</p>
-          <h3 className="mt-2 line-clamp-2 font-semibold leading-snug text-[#18231b] group-hover:underline">{request.title}</h3>
+        <div className="flex flex-1 flex-col p-4">
+          <h3 className="line-clamp-2 font-semibold leading-snug text-[#18231b] group-hover:underline">{request.title}</h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#607060]">{request.objective}</p>
-          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-4 text-xs text-[#789078]">
-            <span>📍 {request.wilaya || "Algeria"}</span>
+          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-rule pt-3 text-xs text-[#789078]">
+            <span>{request.wilaya || "Algeria"}</span>
             {request.budget > 0 && <span>Budget {new Intl.NumberFormat("fr-DZ").format(request.budget)} DA</span>}
             <span>{timeAgo(request.createdAt)}</span>
-            {request.messagesCount > 0 && <span>💬 {request.messagesCount}</span>}
+            {request.messagesCount > 0 && <span>{request.messagesCount} messages</span>}
           </div>
         </div>
       </Link>
-      {footer && <div className="border-t border-[#e6ede5] px-5 py-3">{footer}</div>}
+      {footer && <div className="border-t border-rule bg-panel-head px-4 py-3">{footer}</div>}
     </article>
   );
 }
 
 export function StatCard({ label, value, hint, href, icon: Icon, accent }: { label: string; value: ReactNode; hint?: string; href?: string; icon?: ComponentType<{ className?: string }>; accent?: boolean }) {
   const body = (
-    <div className={cn("h-full rounded-2xl border p-5 transition", accent ? "border-[#40533d] bg-[#40533d] text-white" : "border-[#e3e9e1] bg-white hover:border-[#c9d6c6] hover:shadow-[0_10px_30px_rgb(24_35_27_/_0.08)]")}>
-      <div className="flex items-center justify-between">
+    <div className={cn("tmpl-panel h-full transition", accent ? "!border-[#40533d] !bg-[#40533d] text-white" : "bg-white hover:border-[#b7c4b4]")}>
+      <div className={cn("flex items-center justify-between border-b px-4 py-2.5", accent ? "border-white/20" : "border-rule bg-panel-head")}>
         <p className={cn("text-xs font-bold uppercase tracking-[0.14em]", accent ? "text-white/70" : "text-[#7d8a7b]")}>{label}</p>
         {Icon && <Icon className={cn("h-5 w-5", accent ? "text-white/80" : "text-[#638260]")} />}
       </div>
-      <p className="mt-3 text-3xl font-semibold tracking-tight">{value}</p>
-      {hint && <p className={cn("mt-1 text-sm", accent ? "text-white/75" : "text-[#607060]")}>{hint}</p>}
+      <div className="px-4 py-4">
+        <p className="text-3xl font-semibold tracking-tight">{value}</p>
+        {hint && <p className={cn("mt-1 text-sm", accent ? "text-white/75" : "text-[#607060]")}>{hint}</p>}
+      </div>
     </div>
   );
   return href ? <Link href={href} className="block h-full">{body}</Link> : body;
@@ -205,9 +215,8 @@ export function StatCard({ label, value, hint, href, icon: Icon, accent }: { lab
 
 export function EmptyState({ title, text, action }: { title: string; text?: string; action?: ReactNode }) {
   return (
-    <div className="rounded-[1.5rem] border border-dashed border-[#c9d6c6] bg-white/70 px-6 py-12 text-center">
-      <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#eaf0e8] text-xl text-[#40533d]">✦</span>
-      <p className="mt-4 font-semibold text-[#18231b]">{title}</p>
+    <div className="border border-rule bg-panel px-5 py-10 text-center">
+      <p className="font-semibold text-[#18231b]">{title}</p>
       {text && <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#607060]">{text}</p>}
       {action && <div className="mt-5 flex justify-center">{action}</div>}
     </div>
@@ -225,18 +234,22 @@ export function StarInput({ value, onChange }: { value: number; onChange: (value
 }
 
 export function Notice({ tone = "success", children }: { tone?: "success" | "error" | "info"; children: ReactNode }) {
-  const tones = { success: "border-emerald-200 bg-emerald-50 text-emerald-800", error: "border-red-200 bg-red-50 text-red-700", info: "border-sky-200 bg-sky-50 text-sky-800" };
-  return <p role={tone === "error" ? "alert" : "status"} className={cn("rounded-xl border px-4 py-3 text-sm", tones[tone])}>{children}</p>;
+  const tones = {
+    success: "border-s-4 border-s-ok border border-rule bg-panel text-[#243322]",
+    error: "border-s-4 border-s-alert border border-rule bg-[#fdf2f2] text-alert",
+    info: "border-s-4 border-s-link border border-rule bg-panel text-[#243322]",
+  };
+  return <p role={tone === "error" ? "alert" : "status"} className={cn("px-4 py-3 text-sm", tones[tone])}>{children}</p>;
 }
 
-/** Pill tabs with counters, used across workspaces. */
+/** Filter-bar tabs with counters (UMPT chip bar, not pills). */
 export function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange: (value: T) => void; items: { value: T; label: string; count?: number }[] }) {
   return (
-    <div className="flex gap-1 overflow-x-auto rounded-full border border-[#dce5dc] bg-white p-1" role="tablist">
+    <div className="tmpl-filter-bar overflow-x-auto" role="tablist">
       {items.map((item) => (
-        <button key={item.value} role="tab" aria-selected={value === item.value} type="button" onClick={() => onChange(item.value)} className={cn("flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition", value === item.value ? "bg-[#40533d] text-white" : "text-[#40533d] hover:bg-[#eaf0e8]")}>
+        <button key={item.value} role="tab" aria-selected={value === item.value} type="button" onClick={() => onChange(item.value)} className={cn("flex shrink-0 items-center gap-2 border px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition", value === item.value ? "border-rule bg-panel font-semibold text-link" : "border-transparent text-[#40533d] hover:bg-panel")}>
           {item.label}
-          {item.count !== undefined && <span className={cn("rounded-full px-1.5 py-0.5 text-[10px]", value === item.value ? "bg-white/20" : "bg-[#eaf0e8]")}>{item.count}</span>}
+          {item.count !== undefined && <span className={cn("px-1.5 py-0.5 text-[11px]", value === item.value ? "bg-white text-link" : "bg-panel text-[#607060]")}>{item.count}</span>}
         </button>
       ))}
     </div>

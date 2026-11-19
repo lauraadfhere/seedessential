@@ -64,12 +64,12 @@ export function LanguageSwitcher({
         ) : compact ? (
           <>
             <GlobeIcon className="h-4 w-4 shrink-0" />
-            <span className="text-[10px] font-bold leading-none">{locale.toUpperCase()}</span>
+            <span className="text-[11px] font-bold leading-none">{locale.toUpperCase()}</span>
             <ChevronDownIcon className="h-3 w-3 shrink-0" />
           </>
         ) : (
           <>
-            <span className="text-[10px] font-medium text-neutral-500">{t("auth.language")}</span>
+            <span className="text-[11px] font-medium text-neutral-500">{t("auth.language")}</span>
             <span className="flex w-full items-center gap-2 text-sm font-medium">
               <GlobeIcon className="h-4 w-4 shrink-0" />
               {fullNames[locale]}

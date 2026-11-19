@@ -28,7 +28,7 @@ export function OrderSummary({
   }
 
   return (
-    <div className="rounded-2xl border border-[#e4ebe3] bg-[#f4f7f2] p-4">
+    <div className="network-card bg-[#f4f7f2] p-4">
       <h4 className="font-semibold mb-3">Shipping Details</h4>
       
       <div className="space-y-3">

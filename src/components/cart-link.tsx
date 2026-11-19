@@ -20,7 +20,7 @@ export function CartLink({ className, onClick }: CartLinkProps) {
     >
       <BagIcon className="h-[18px] w-[18px]" />
       {count > 0 && (
-        <span className="absolute right-1 top-1 grid min-w-4 place-items-center rounded-full bg-white px-1 text-[9px] font-bold leading-4 text-[#40533d]">
+        <span className="absolute right-1 top-1 grid min-w-4 place-items-center rounded-full bg-white px-1 text-[11px] font-bold leading-4 text-[#40533d]">
           {count > 99 ? "99+" : count}
         </span>
       )}
