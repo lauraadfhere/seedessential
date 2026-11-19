@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Link } from "@/components/locale-link";
 import { AuthShell } from "@/components/auth-shell";
 import { DeepCard, DeepInput, DeepButton } from "@/components/deep-ui";
-import { getParse } from "@/lib/parse/client";
+import { setSessionSecret } from "@/lib/appwrite/client";
 import { useI18n } from "@/lib/i18n";
 import { homePathForRole } from "@/lib/roles";
 
@@ -37,15 +37,18 @@ function SignInForm() {
   const nextPath = safeNextPath(searchParams.get("next"), locale);
 
   async function completeLogin(loginEmail: string, loginPassword: string) {
-    const user = await getParse().User.logIn(loginEmail.trim().toLowerCase(), loginPassword);
-    const me = await fetch("/api/me", { headers: { Authorization: `Bearer ${user.getSessionToken()}` } });
-    if (me.status === 403) {
-      const data = await me.json().catch(() => ({}));
-      await getParse().User.logOut().catch(() => undefined);
-      throw new Error(data.reason ? `${data.error} Reason: ${data.reason}` : data.error || "This account is suspended.");
+    const response = await fetch("/api/auth/sign-in", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: loginEmail.trim().toLowerCase(), password: loginPassword }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || "Sign-in failed");
     }
+    setSessionSecret(data.secret);
     window.dispatchEvent(new Event("tannelli:auth"));
-    router.replace(nextPath ?? `/${locale}${homePathForRole(user.get("role"))}`);
+    router.replace(nextPath ?? `/${locale}${data.homePath || homePathForRole(data.user?.role)}`);
   }
 
   function continueWithEmail(event: FormEvent<HTMLFormElement>) {

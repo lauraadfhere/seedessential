@@ -20,6 +20,8 @@
  * configuration" during hydration.
  */
 const FALLBACKS = {
+  NEXT_PUBLIC_APPWRITE_ENDPOINT: "https://fra.cloud.appwrite.io/v1",
+  NEXT_PUBLIC_APPWRITE_PROJECT_ID: "6ad515c80023f767eed7",
   NEXT_PUBLIC_PARSE_APP_ID: "rrbodmxViK4CBzFVzG5mK7AkFNRcRoMiJAcs9RGQ",
   NEXT_PUBLIC_PARSE_JS_KEY: "R8lmfcjTXOxRYlLHO2YpaCLtHqPNcs33gNQjNpCD",
   NEXT_PUBLIC_PARSE_SERVER_URL: "https://parseapi.back4app.com/",

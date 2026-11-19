@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "./locale-link";
 import { cn } from "./ui";
-import { getParse } from "@/lib/parse/client";
+import { getSessionSecret, setSessionSecret } from "@/lib/appwrite/client";
 import { authHeaders } from "@/lib/api-client";
 import { useI18n } from "@/lib/i18n";
 import { audienceLabel, isExpertRole, isProviderRole } from "@/lib/roles";
 import type { MarketplaceSummary } from "@/lib/marketplace-types";
+import { resolveAvatarUrl } from "@/lib/default-avatar";
 import { mediaUrl } from "./marketplace";
 
 export type Account = { id: string; name: string; avatar?: string; role: string; accountKind?: string; completeness?: number; status?: string };
@@ -29,26 +30,26 @@ export function useAccount(pathname?: string) {
     const refresh = async (force = false) => {
       if (!force && Date.now() - last < 15000) return;
       last = Date.now();
-      const user = getParse().User.current();
-      if (!user) {
+      const token = getSessionSecret();
+      if (!token) {
         if (live) { setAccount(null); setSummary(null); setReady(true); }
         return;
       }
       try {
         const response = await fetch("/api/me", { headers: authHeaders(), cache: "no-store" });
         if (response.status === 401 || response.status === 403) {
-          await getParse().User.logOut().catch(() => undefined);
+          setSessionSecret(null);
           if (live) { setAccount(null); setSummary(null); }
           return;
         }
         if (!response.ok) throw new Error();
         const me = await response.json();
         if (!live) return;
-        setAccount({ id: me.id, name: me.name || me.email || "Account", avatar: me.avatar || undefined, role: me.role, accountKind: me.accountKind, completeness: me.completeness?.score, status: me.status });
+        setAccount({ id: me.id, name: me.name || me.email || "Account", avatar: resolveAvatarUrl(me.avatar), role: me.role, accountKind: me.accountKind, completeness: me.completeness?.score, status: me.status });
         const next = await fetch("/api/marketplace/summary", { headers: authHeaders() }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
         if (live) setSummary(next);
       } catch {
-        if (live) setAccount((current) => current ?? { id: user.id ?? "", name: user.get("name") || "Account", role: user.get("role") || "customer", accountKind: user.get("accountKind") });
+        if (live) setAccount((current) => current);
       } finally {
         if (live) setReady(true);
       }
@@ -87,9 +88,13 @@ export function NotificationBell({ account, summary, className }: { account: Acc
   );
 }
 
-/** Clears the Parse session and returns to the locale home. */
+/** Clears the Appwrite session and returns to the locale home. */
 export async function signOutAccount(locale: string, onSignedOut?: () => void) {
-  await getParse().User.logOut().catch(() => undefined);
+  const token = getSessionSecret();
+  if (token) {
+    await fetch("/api/auth/sign-out", { method: "POST", headers: { Authorization: `Bearer ${token}` } }).catch(() => undefined);
+  }
+  setSessionSecret(null);
   window.dispatchEvent(new Event("tannelli:auth"));
   onSignedOut?.();
 }
@@ -168,7 +173,11 @@ export function AccountMenu({ account, summary, onSignedOut, size = "md" }: { ac
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen((value) => !value)} aria-label={t("account.openMenu")} aria-expanded={open} aria-haspopup="menu" className={cn("grid place-items-center overflow-hidden rounded-full border-2 border-white/50 bg-white/15 text-xs font-bold text-white transition hover:border-white", size === "sm" ? "h-9 w-9" : "h-10 w-10")}>
-        {account.avatar ? <img src={mediaUrl(account.avatar, 96)} alt="" className="h-full w-full object-cover" /> : account.name.slice(0, 1).toUpperCase()}
+        <img
+          src={/^https?:\/\//.test(account.avatar || "") ? account.avatar! : mediaUrl(resolveAvatarUrl(account.avatar), 96)}
+          alt=""
+          className="h-full w-full object-cover"
+        />
       </button>
       {open && (
         <div role="menu" className="absolute right-0 top-full z-30 mt-3 w-64 overflow-hidden rounded-2xl border border-[#dce5dc] bg-[#fbfdf9] p-2 text-sm text-neutral-900 shadow-[0_20px_55px_rgb(24_35_27_/_0.24)] rtl:left-0 rtl:right-auto">

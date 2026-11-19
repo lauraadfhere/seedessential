@@ -11,6 +11,7 @@ import type {
   RequestRecord,
   RequestStatus,
 } from "@/lib/marketplace-types";
+import { resolveAvatarUrl } from "@/lib/default-avatar";
 
 export type ViewerRole = "admin" | "expert" | "provider" | "customer";
 
@@ -54,9 +55,20 @@ export function slugifyName(name: string) {
   return `${base}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
+function authOpts(user: Parse.User) {
+  const sessionToken = user.getSessionToken();
+  return sessionToken ? { sessionToken } : { useMasterKey: true as const };
+}
+
 export async function getExpertProfile(user: Parse.User) {
   const Parse = getParseAdmin();
-  return new Parse.Query("ExpertProfile").equalTo("user", user).first({ useMasterKey: true });
+  const opts = authOpts(user);
+  try {
+    return await new Parse.Query("ExpertProfile").equalTo("user", user).first(opts);
+  } catch {
+    // Public-read profiles still resolve when master key / session CLP fails.
+    return new Parse.Query("ExpertProfile").equalTo("user", user).first();
+  }
 }
 
 /** Experts who registered before profiles existed get a pending profile on first use. */
@@ -83,10 +95,17 @@ export async function ensureExpertProfile(user: Parse.User) {
     online: true,
     status: "pending",
   });
-  const acl = new Parse.ACL();
+  const acl = new Parse.ACL(user);
   acl.setPublicReadAccess(true);
+  acl.setReadAccess(user, true);
+  acl.setWriteAccess(user, true);
   profile.setACL(acl);
-  await profile.save(null, { useMasterKey: true });
+  try {
+    await profile.save(null, authOpts(user));
+  } catch {
+    // Last resort when master key is invalid but class create is open to the role.
+    await profile.save(null, user.getSessionToken() ? { sessionToken: user.getSessionToken()! } : undefined);
+  }
   return profile;
 }
 
@@ -102,7 +121,7 @@ export function serializeExpert(profile: Parse.Object): ExpertSummary {
     id: idOf(profile),
     slug: profile.get("slug") ?? profile.id,
     name: profile.get("name") || displayName(user, "Expert"),
-    avatar: profile.get("avatar") || user?.get?.("profilePicturePublicId") || undefined,
+    avatar: resolveAvatarUrl(profile.get("avatar") || user?.get?.("profilePicturePublicId")),
     professionalCategory: profile.get("professionalCategory") ?? "General",
     specialties: profile.get("specialties") ?? [],
     bio: profile.get("bio") ?? "",
@@ -234,7 +253,7 @@ export function serializeRequest(request: Parse.Object, viewer: Viewer, messages
           name: assigned.get("name") ?? "Expert",
           professionalCategory: assigned.get("professionalCategory") ?? "",
           location: assigned.get("location") ?? "",
-          avatar: assigned.get("avatar") || undefined,
+          avatar: resolveAvatarUrl(assigned.get("avatar")),
         }
       : null,
     recommendation: request.get("recommendation") ?? "",

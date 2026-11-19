@@ -636,6 +636,63 @@ main > :not(.bg-black):not(.bg-emerald-950) p:not(.text-xs) {
   }
 }
 
+/* ---- Admin shell: restore soft radius + clearer form controls ----
+   UMPT ruled (square) language stays elsewhere; admin keeps rounded cards/fields. */
+.admin-shell .network-card,
+.admin-shell .ui-card {
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px rgb(24 35 27 / 0.06);
+}
+.admin-shell .network-card-hover:hover {
+  box-shadow: 0 14px 36px rgb(24 35 27 / 0.1);
+}
+.admin-shell .ui-field,
+.admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.sr-only),
+.admin-shell select,
+.admin-shell textarea {
+  border-radius: 0.75rem !important;
+  border-color: #d5dfd3 !important;
+  background: #fff !important;
+  padding: 0.7rem 0.9rem !important;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease !important;
+}
+.admin-shell .ui-field:focus,
+.admin-shell .ui-field:focus-within,
+.admin-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.admin-shell select:focus,
+.admin-shell textarea:focus {
+  border-color: #40533d !important;
+  box-shadow: 0 0 0 3px rgb(64 83 61 / 0.16) !important;
+}
+.admin-shell .ui-btn,
+.admin-shell button.bg-\[\#40533d\],
+.admin-shell button[class*="bg-[#40533d]"] {
+  border-radius: 0.75rem;
+}
+.admin-shell label.text-xs.font-semibold,
+.admin-shell .admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #243322;
+}
+.admin-shell .admin-form-panel {
+  border-radius: 1.25rem;
+  border: 1px solid var(--rule);
+  background: #fff;
+  box-shadow: 0 10px 30px rgb(24 35 27 / 0.06);
+  padding: 1.25rem;
+}
+.admin-shell aside button,
+.admin-shell .SignOutButton,
+.admin-shell button.border {
+  border-radius: 0.85rem;
+}
+.admin-shell span.border.px-2\.5,
+.admin-shell span[class*="border px-2.5"] {
+  border-radius: 9999px;
+}
+
 /* ---- Impeccable review fixes (legibility, contrast, wrapping) ----
    Floors functional micro-labels at 11px, lifts grey text on dark surfaces to
    a WCAG AA ratio, and stops headings/body copy ending on a lone word. */

@@ -2,9 +2,10 @@
 
 import { useRef, useState, type ChangeEvent, type ComponentType, type ReactNode } from "react";
 import { Link } from "./locale-link";
-import { cn, initials } from "./ui";
+import { cn } from "./ui";
 import { cloudinaryImage } from "@/lib/cloudinary-client";
 import { uploadToCloudinary, type UploadFolder } from "@/lib/api-client";
+import { resolveAvatarUrl } from "@/lib/default-avatar";
 import {
   STATUS_META,
   STATUS_STEPS,
@@ -21,9 +22,11 @@ export function mediaUrl(source: string, size = 320) {
 }
 
 export function Avatar({ src, name, className }: { src?: string; name: string; className?: string }) {
+  const resolved = resolveAvatarUrl(src, 160);
+  const imageSrc = /^https?:\/\//.test(resolved) ? resolved : mediaUrl(resolved, 160);
   return (
-    <span className={cn("grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#eaf0e8] font-semibold text-[#40533d]", className ?? "h-10 w-10 text-sm")}>
-      {src ? <img src={mediaUrl(src, 160)} alt="" className="h-full w-full object-cover" /> : initials(name || "T")}
+    <span className={cn("grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#eaf0e8] font-semibold text-[#40533d]", className ?? "h-10 w-10 text-sm")} title={name}>
+      <img src={imageSrc} alt="" className="h-full w-full object-cover" />
     </span>
   );
 }

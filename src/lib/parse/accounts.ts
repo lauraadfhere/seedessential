@@ -3,6 +3,7 @@ import "server-only";
 import type Parse from "parse/node";
 import { getParseAdmin } from "./admin";
 import { getExpertProfile, roleOf } from "./marketplace";
+import { resolveAvatarUrl } from "@/lib/default-avatar";
 import { profileCompleteness, type AccountProfile, type AccountRole, type BusinessProfile, type ExpertProfileSummary } from "@/lib/profile";
 import type { TrustReport } from "@/lib/trust";
 
@@ -121,7 +122,7 @@ export async function buildAccountProfile(user: Parse.User): Promise<AccountProf
     status: (user.get("status") as string) ?? "active",
     name: (user.get("name") as string) ?? "",
     phone: (user.get("phone") as string) ?? "",
-    avatar: avatarOf(user),
+    avatar: resolveAvatarUrl(avatarOf(user)),
     wilaya: (user.get("wilaya") as string) ?? "",
     bio: (user.get("bio") as string) ?? "",
     locale: (user.get("locale") as string) ?? "en",

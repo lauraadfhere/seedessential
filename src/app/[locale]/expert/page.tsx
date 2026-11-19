@@ -123,16 +123,20 @@ function ExpertStudio() {
     router.replace(`/${locale}/expert?tab=${next}`, { scroll: false });
   };
 
-  const load = useCallback(
-    () =>
-      Promise.all([api<Profile>("/api/expert/profile"), api<RequestRecord[]>("/api/expert-requests")])
-        .then(([me, list]) => {
-          setProfile(me);
-          setRequests(list);
-        })
-        .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load your workspace.")),
-    [],
-  );
+  const load = useCallback(async () => {
+    setError("");
+    try {
+      const me = await api<Profile>("/api/expert/profile");
+      setProfile(me);
+      try {
+        setRequests(await api<RequestRecord[]>("/api/expert-requests"));
+      } catch {
+        setRequests([]);
+      }
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not load your workspace.");
+    }
+  }, []);
   useEffect(() => { void load(); }, [load]);
 
   const inbox = useMemo(() => requests.filter((item) => item.status === "open" && !item.viewer.isAssignedExpert && (!topic || item.category === topic)), [requests, topic]);

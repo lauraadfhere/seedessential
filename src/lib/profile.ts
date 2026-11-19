@@ -1,3 +1,4 @@
+import { hasCustomAvatar } from "@/lib/default-avatar";
 import type { TrustReport } from "./trust";
 
 export type AccountRole = "customer" | "expert" | "provider" | "admin";
@@ -80,7 +81,7 @@ type CompletenessSource = Pick<AccountProfile, "role" | "accountKind" | "name" |
 export function profileCompleteness(profile: CompletenessSource): Completeness {
   const base: Check[] = [
     { key: "name", label: "Full name", done: filled(profile.name, 2) },
-    { key: "avatar", label: "Profile photo", done: filled(profile.avatar) },
+    { key: "avatar", label: "Profile photo", done: hasCustomAvatar(profile.avatar) },
     { key: "phone", label: "Phone number", done: filled(profile.phone, 8) },
     { key: "wilaya", label: "Home wilaya", done: filled(profile.wilaya) },
   ];
@@ -104,7 +105,7 @@ export function profileCompleteness(profile: CompletenessSource): Completeness {
     return score([
       { key: "name", label: "Contact name", done: filled(profile.name, 2) },
       { key: "companyName", label: "Company name", done: filled(business?.companyName, 2) },
-      { key: "logo", label: "Company logo", done: filled(business?.logo) || filled(profile.avatar) },
+      { key: "logo", label: "Company logo", done: filled(business?.logo) || hasCustomAvatar(profile.avatar) },
       { key: "contactPhone", label: "Business phone", done: filled(business?.contactPhone, 8) || filled(profile.phone, 8) },
       { key: "companyType", label: "Company type", done: filled(business?.companyType) },
       { key: "registryNumber", label: "Trade registry number (RC)", done: filled(business?.registryNumber, 4), weight: 2 },

@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@/components/locale-link";
 import { PageHero } from "@/components/page-hero";
-import { getParse } from "@/lib/parse/client";
+import { browserSessionToken, fetchMe } from "@/lib/appwrite/browser-auth";
 import { useI18n } from "@/lib/i18n";
 import { categories } from "@/lib/data";
 import { cloudinaryImage } from "@/lib/cloudinary-client";
@@ -55,7 +55,7 @@ function DemandBars({ title, rows }: { title: string; rows: { name: string; coun
 }
 
 function token() {
-  return getParse().User.current()?.getSessionToken() ?? "";
+  return browserSessionToken();
 }
 
 function opts(init: RequestInit = {}) {
@@ -75,24 +75,25 @@ export default function ProviderPage() {
   const [insights, setInsights] = useState<Insights | null>(null);
 
   useEffect(() => {
-    const user = getParse().User.current();
-    if (!user) {
-      router.replace(`/${locale}/sign-in`);
-      return;
-    }
-    if (!isProviderRole(user.get("role"))) {
-      setAllowed(false);
-      return;
-    }
-    setAllowed(true);
-    fetch("/api/provider/products", opts())
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then(setItems)
-      .catch(() => setNotice("Could not load your equipment list."));
-    fetch("/api/provider/insights", opts())
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then(setInsights)
-      .catch(() => undefined);
+    void fetchMe().then((user) => {
+      if (!user) {
+        router.replace(`/${locale}/sign-in`);
+        return;
+      }
+      if (!isProviderRole(user.role)) {
+        setAllowed(false);
+        return;
+      }
+      setAllowed(true);
+      fetch("/api/provider/products", opts())
+        .then((response) => (response.ok ? response.json() : Promise.reject()))
+        .then(setItems)
+        .catch(() => setNotice("Could not load your equipment list."));
+      fetch("/api/provider/insights", opts())
+        .then((response) => (response.ok ? response.json() : Promise.reject()))
+        .then(setInsights)
+        .catch(() => undefined);
+    });
   }, [locale, router]);
 
   const recommendationsBySlug = new Map(insights?.products.map((product) => [product.slug, product]) ?? []);

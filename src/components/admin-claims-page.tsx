@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getParse } from "@/lib/parse/client";
+import { browserSessionToken, fetchMe } from "@/lib/appwrite/browser-auth";
 import { useI18n } from "@/lib/i18n";
 import { AdminPageBar } from "@/components/header-parts";
 
@@ -32,7 +32,7 @@ const STATUS_TONES: Record<string, string> = {
   rejected: "bg-neutral-100 text-neutral-700 ring-neutral-200",
   pending: "bg-neutral-100 text-neutral-700 ring-neutral-200",
 };
-const token = () => getParse().User.current()?.getSessionToken() ?? "";
+const token = () => browserSessionToken();
 
 export function AdminClaimsPage() {
   const { locale } = useI18n();
@@ -45,14 +45,15 @@ export function AdminClaimsPage() {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const user = getParse().User.current();
-    if (!user) return router.replace(`/${locale}/sign-in`);
-    if (user.get("role") !== "admin") return router.replace(`/${locale}/dashboard`);
-    fetch("/api/complaints", { headers: { Authorization: `Bearer ${token()}` } })
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("load failed"))))
-      .then((data: AdminClaim[]) => setClaims(data))
-      .catch(() => setNotice("Could not load claims. Please refresh the page."))
-      .finally(() => setLoading(false));
+    void fetchMe().then((user) => {
+      if (!user) return router.replace(`/${locale}/sign-in`);
+      if (user.role !== "admin") return router.replace(`/${locale}/dashboard`);
+      fetch("/api/complaints", { headers: { Authorization: `Bearer ${token()}` } })
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error("load failed"))))
+        .then((data: AdminClaim[]) => setClaims(data))
+        .catch(() => setNotice("Could not load claims. Please refresh the page."))
+        .finally(() => setLoading(false));
+    });
   }, [locale, router]);
 
   const counts = useMemo(() => {

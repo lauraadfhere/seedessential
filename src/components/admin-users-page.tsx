@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getParse } from "@/lib/parse/client";
+import { browserSessionToken, fetchMe } from "@/lib/appwrite/browser-auth";
 import { useI18n } from "@/lib/i18n";
 import { AdminPageBar } from "@/components/header-parts";
 
@@ -17,7 +17,7 @@ type AdminUser = {
 
 const ROLES = ["admin", "customer", "expert", "provider"];
 const STATUSES = ["active", "pending", "suspended"];
-const token = () => getParse().User.current()?.getSessionToken() ?? "";
+const token = () => browserSessionToken();
 
 export function AdminUsersPage() {
   const { locale } = useI18n();
@@ -31,10 +31,11 @@ export function AdminUsersPage() {
   const [currentId, setCurrentId] = useState("");
 
   useEffect(() => {
-    const user = getParse().User.current();
-    if (!user) return router.replace(`/${locale}/sign-in`);
-    if (user.get("role") !== "admin") return router.replace(`/${locale}/dashboard`);
-    setCurrentId(user.id ?? "");
+    void fetchMe().then((user) => {
+      if (!user) return router.replace(`/${locale}/sign-in`);
+      if (user.role !== "admin") return router.replace(`/${locale}/dashboard`);
+      setCurrentId(user.id ?? "");
+    });
   }, [locale, router]);
 
   useEffect(() => {

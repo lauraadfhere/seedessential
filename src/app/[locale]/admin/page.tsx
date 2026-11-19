@@ -2,7 +2,7 @@
 
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getParse } from "@/lib/parse/client";
+import { browserSessionToken, fetchMe } from "@/lib/appwrite/browser-auth";
 import { useI18n } from "@/lib/i18n";
 import { cloudinaryImage } from "@/lib/cloudinary-client";
 import { ProductVisual } from "@/components/product-card";
@@ -47,7 +47,7 @@ const adminCards: AdminCard[] = [
 const equipmentCategories = categories.filter((item) => item.kind === "equipment");
 
 function token() {
-  return getParse().User.current()?.getSessionToken() ?? "";
+  return browserSessionToken();
 }
 
 function opts(init: RequestInit = {}) {
@@ -83,11 +83,11 @@ function AdminShell({ active, onSelect, children }: { active: string; onSelect: 
         onClick={() => (enabled ? onSelect(workspace) : undefined)}
         disabled={!enabled}
         title={title}
-        className={`group relative flex w-full items-center justify-center gap-3 px-2 py-2.5 text-sm font-semibold transition sm:justify-start sm:px-3 ${
+        className={`group relative flex w-full items-center justify-center gap-3 rounded-xl px-2 py-2.5 text-sm font-semibold transition sm:justify-start sm:px-3 ${
           selected ? "bg-white text-[#18231b]" : enabled ? "text-white/80 hover:bg-white/8 hover:text-white" : "cursor-default text-white/30"
         }`}
       >
-        <span className={`grid h-9 w-9 shrink-0 place-items-center border ${selected ? "border-[#40533d]/15 bg-[#40533d] text-white" : "border-white/15 bg-white/8"}`}>
+        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border ${selected ? "border-[#40533d]/15 bg-[#40533d] text-white" : "border-white/15 bg-white/8"}`}>
           <AdminIcon name={icon} className="h-4 w-4" />
         </span>
         <span className="hidden sm:block">{title}</span>
@@ -132,14 +132,14 @@ function Pricing({ item, update }: { item: CatalogItem; update: (payload: Record
   const [dzd, setDzd] = useState(item.priceDzd === undefined ? "" : String(item.priceDzd));
   const [saving, setSaving] = useState(false);
   return (
-    <div className="mt-4 grid grid-cols-[1fr_1fr_auto] gap-2 border border-rule bg-[#f6f8f5] p-3">
-      <label className="text-xs font-semibold">
+    <div className="mt-4 grid grid-cols-[1fr_1fr_auto] gap-3 rounded-2xl border border-[#dce5dc] bg-[#f6f8f5] p-3.5">
+      <label className="admin-field text-xs font-semibold">
         USD ($)
-        <input aria-label="USD price" type="number" min="0" step="0.01" value={usd} onChange={(e) => setUsd(e.target.value)} className="ui-field mt-1 !py-1.5 text-sm font-normal" />
+        <input aria-label="USD price" type="number" min="0" step="0.01" value={usd} onChange={(e) => setUsd(e.target.value)} className="ui-field text-sm font-normal" />
       </label>
-      <label className="text-xs font-semibold">
+      <label className="admin-field text-xs font-semibold">
         DZD
-        <input aria-label="DZD price" type="number" min="0" step="1" placeholder="Optional" value={dzd} onChange={(e) => setDzd(e.target.value)} className="ui-field mt-1 !py-1.5 text-sm font-normal" />
+        <input aria-label="DZD price" type="number" min="0" step="1" placeholder="Optional" value={dzd} onChange={(e) => setDzd(e.target.value)} className="ui-field text-sm font-normal" />
       </label>
       <button
         disabled={saving}
@@ -151,7 +151,7 @@ function Pricing({ item, update }: { item: CatalogItem; update: (payload: Record
             setSaving(false);
           }
         }}
-        className="self-end bg-[#40533d] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#30412e]"
+        className="self-end rounded-xl bg-[#40533d] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#30412e] disabled:opacity-60"
       >
         {saving ? "…" : "Save"}
       </button>
@@ -212,20 +212,20 @@ function CatalogCard({ item, uploading, editing, draft, setDraft, setEditing, up
           </div>
           <Pricing item={item} update={(payload) => update(item.slug, payload).then(() => onNotice("USD and DZD prices saved."))} />
           {item.kind === "plant" ? (
-            <label className="mt-4 flex cursor-pointer items-center justify-between border border-rule bg-[#f6f8f5] p-3 text-sm">
+            <label className="mt-4 flex cursor-pointer items-center justify-between rounded-2xl border border-[#dce5dc] bg-[#f6f8f5] p-3.5 text-sm">
               <span>Available for expert requests</span>
               <input type="checkbox" checked={item.availableForExpertRequests} onChange={(e) => update(item.slug, { availableForExpertRequests: e.target.checked }).then(() => onNotice("Availability updated."))} className="h-4 w-4 accent-[#40533d]" />
             </label>
           ) : (
-            <label className="mt-4 flex cursor-pointer items-center justify-between border border-rule bg-[#f6f8f5] p-3 text-sm">
+            <label className="mt-4 flex cursor-pointer items-center justify-between rounded-2xl border border-[#dce5dc] bg-[#f6f8f5] p-3.5 text-sm">
               <span>Show in Popular equipment</span>
               <input type="checkbox" checked={item.featured} onChange={(e) => update(item.slug, { featured: e.target.checked }).then(() => onNotice("Homepage equipment updated."))} className="h-4 w-4 accent-[#40533d]" />
             </label>
           )}
           {status !== "published" && (
-            <div className="mt-3 flex gap-2">
-              <button onClick={() => update(item.slug, { visibilityStatus: "published", featured: item.featured }).then(() => onNotice("Listing is now visible in the shop."))} className="bg-[#40533d] px-3 py-2 text-xs font-bold text-white">Accept & publish</button>
-              {status !== "rejected" && <button onClick={() => update(item.slug, { visibilityStatus: "rejected" }).then(() => onNotice("Listing was kept hidden."))} className="border border-rule px-3 py-2 text-xs font-bold text-red-700">Reject</button>}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button onClick={() => update(item.slug, { visibilityStatus: "published", featured: item.featured }).then(() => onNotice("Listing is now visible in the shop."))} className="rounded-xl bg-[#40533d] px-3.5 py-2.5 text-xs font-bold text-white">Accept & publish</button>
+              {status !== "rejected" && <button onClick={() => update(item.slug, { visibilityStatus: "rejected" }).then(() => onNotice("Listing was kept hidden."))} className="rounded-xl border border-[#dce5dc] px-3.5 py-2.5 text-xs font-bold text-red-700 hover:bg-red-50">Reject</button>}
             </div>
           )}
           {status === "published" && item.providerName && (
@@ -235,18 +235,18 @@ function CatalogCard({ item, uploading, editing, draft, setDraft, setEditing, up
             <p className="text-xs font-bold uppercase tracking-wide text-[#789078]">Cloudinary collection · {item.images.length}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {item.images.map((image, index) => (
-                <div key={image} className="group relative h-14 w-14 overflow-hidden border border-rule">
+                <div key={image} className="group relative h-14 w-14 overflow-hidden rounded-xl border border-[#dce5dc]">
                   <img src={cloudinaryImage(image, { width: 120, height: 120 })} alt="" className="h-full w-full object-cover" />
                   {index === 0 && <span className="absolute inset-x-0 bottom-0 bg-black/65 py-0.5 text-center text-[11px] font-bold text-white">COVER</span>}
                   <div className="absolute inset-0 hidden place-items-center gap-1 bg-black/60 p-1 group-hover:grid">
-                    <button type="button" onClick={() => update(item.slug, { coverImagePublicId: image }).then(() => onNotice("Cover image updated."))} className="bg-white px-1 py-1 text-[11px] font-bold">{index === 0 ? "Current" : "Cover"}</button>
-                    <button type="button" onClick={() => update(item.slug, { removeImagePublicId: image }).then(() => onNotice("Image removed."))} className="bg-white px-1 py-1 text-[11px] font-bold text-red-700">Remove</button>
+                    <button type="button" onClick={() => update(item.slug, { coverImagePublicId: image }).then(() => onNotice("Cover image updated."))} className="rounded-md bg-white px-1 py-1 text-[11px] font-bold">{index === 0 ? "Current" : "Cover"}</button>
+                    <button type="button" onClick={() => update(item.slug, { removeImagePublicId: image }).then(() => onNotice("Image removed."))} className="rounded-md bg-white px-1 py-1 text-[11px] font-bold text-red-700">Remove</button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <label className="mt-4 flex cursor-pointer justify-center border border-dashed border-[#b8c6b6] px-3 py-3 text-sm font-semibold text-[#40533d] transition hover:bg-[#f6f8f5]">
+          <label className="mt-4 flex cursor-pointer justify-center rounded-2xl border border-dashed border-[#b8c6b6] px-3 py-3.5 text-sm font-semibold text-[#40533d] transition hover:border-[#40533d] hover:bg-[#f6f8f5]">
             {uploading === item.slug ? "Uploading…" : "Add collection image"}
             <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => upload(item.slug, e)} />
           </label>
@@ -272,28 +272,31 @@ export default function AdminPage() {
   const [queue, setQueue] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    if (getParse().User.current()?.get("role") !== "admin") return;
-    fetch("/api/marketplace/summary", opts())
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((summary) => setQueue(summary.counts ?? {}))
-      .catch(() => undefined);
+    void fetchMe().then((user) => {
+      if (user?.role !== "admin") return;
+      fetch("/api/marketplace/summary", opts())
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((summary) => setQueue(summary.counts ?? {}))
+        .catch(() => undefined);
+    });
   }, []);
 
   useEffect(() => {
-    const user = getParse().User.current();
-    if (!user) {
-      router.replace(`/${locale}/sign-in`);
-      return;
-    }
-    if (user.get("role") !== "admin") {
-      setAllowed(false);
-      return;
-    }
-    setAllowed(true);
-    fetch("/api/admin/products", opts())
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then(setItems)
-      .catch(() => setNotice("Could not load the catalog."));
+    void fetchMe().then((user) => {
+      if (!user) {
+        router.replace(`/${locale}/sign-in`);
+        return;
+      }
+      if (user.role !== "admin") {
+        setAllowed(false);
+        return;
+      }
+      setAllowed(true);
+      fetch("/api/admin/products", opts())
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then(setItems)
+        .catch(() => setNotice("Could not load the catalog."));
+    });
   }, [locale, router]);
 
   async function update(slug: string, payload: Record<string, unknown>) {
@@ -407,7 +410,7 @@ export default function AdminPage() {
                 { label: "Flagged messages", value: queue.messages ?? 0, href: "moderation" },
                 { label: "Experts awaiting verification", value: queue.experts ?? 0, href: "experts" },
               ].map((item) => (
-                <button key={item.label} onClick={() => openWorkspace(item.href)} className={`flex items-center justify-between border px-4 py-3 text-left text-sm transition ${item.value ? "border-amber-300 bg-amber-50 text-amber-900" : "border-rule bg-white text-[#607060]"}`}>
+                <button key={item.label} onClick={() => openWorkspace(item.href)} className={`flex items-center justify-between rounded-2xl border px-4 py-3.5 text-left text-sm transition ${item.value ? "border-amber-300 bg-amber-50 text-amber-900" : "border-[#dce5dc] bg-white text-[#607060] hover:border-[#b7c4b4]"}`}>
                   <span className="font-semibold">{item.label}</span>
                   <span className="text-xl font-semibold">{item.value}</span>
                 </button>
@@ -455,25 +458,29 @@ export default function AdminPage() {
                   : "Add Tannelli equipment, feature it on the homepage, and accept or reject company submissions before they become visible."}
               </p>
             </div>
-            <div className="border border-[#40533d] bg-[#40533d] px-5 py-3 text-xs font-semibold text-white">
+            <div className="rounded-2xl border border-[#40533d] bg-[#40533d] px-5 py-3 text-xs font-semibold text-white">
               {visible.length} {workspace}
             </div>
           </div>
-          {notice && <p className="mt-6 border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
+          {notice && <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{notice}</p>}
 
           {workspace === "equipment" && (
-            <form onSubmit={addEquipment} className="network-card mt-8 grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-6">
-              <label className="text-xs font-semibold lg:col-span-2">Name<input required value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
-              <label className="text-xs font-semibold">Category
-                <select value={form.category} onChange={(e) => setForm((current) => ({ ...current, category: e.target.value }))} className="ui-field mt-1 text-sm font-normal">
+            <form onSubmit={addEquipment} className="admin-form-panel mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+              <div className="lg:col-span-6">
+                <p className="text-sm font-semibold text-[#18231b]">Add equipment</p>
+                <p className="mt-1 text-xs text-[#607060]">Create a catalog item, set pricing, then publish when ready.</p>
+              </div>
+              <label className="admin-field text-xs font-semibold lg:col-span-2">Name<input required value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className="ui-field text-sm font-normal" placeholder="e.g. Drip irrigation kit" /></label>
+              <label className="admin-field text-xs font-semibold">Category
+                <select value={form.category} onChange={(e) => setForm((current) => ({ ...current, category: e.target.value }))} className="ui-field text-sm font-normal">
                   {equipmentCategories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}
                 </select>
               </label>
-              <label className="text-xs font-semibold">USD<input required type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
-              <label className="text-xs font-semibold">DZD<input type="number" min="0" value={form.priceDZD} onChange={(e) => setForm((current) => ({ ...current, priceDZD: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
-              <label className="text-xs font-semibold sm:col-span-2 lg:col-span-4">Short description<input value={form.short} onChange={(e) => setForm((current) => ({ ...current, short: e.target.value }))} className="ui-field mt-1 text-sm font-normal" /></label>
-              <label className="flex items-center gap-2 text-xs font-semibold lg:col-span-1"><input type="checkbox" checked={form.featured} onChange={(e) => setForm((current) => ({ ...current, featured: e.target.checked }))} className="h-4 w-4 accent-[#40533d]" />Popular</label>
-              <button disabled={creating} className="bg-[#40533d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white lg:col-span-1">{creating ? "Adding…" : "Add equipment"}</button>
+              <label className="admin-field text-xs font-semibold">USD<input required type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} className="ui-field text-sm font-normal" placeholder="0.00" /></label>
+              <label className="admin-field text-xs font-semibold">DZD<input type="number" min="0" value={form.priceDZD} onChange={(e) => setForm((current) => ({ ...current, priceDZD: e.target.value }))} className="ui-field text-sm font-normal" placeholder="Optional" /></label>
+              <label className="admin-field text-xs font-semibold sm:col-span-2 lg:col-span-4">Short description<input value={form.short} onChange={(e) => setForm((current) => ({ ...current, short: e.target.value }))} className="ui-field text-sm font-normal" placeholder="One-line shop summary" /></label>
+              <label className="flex items-center gap-2 self-end rounded-xl border border-[#dce5dc] bg-[#f6f8f5] px-3 py-3 text-xs font-semibold lg:col-span-1"><input type="checkbox" checked={form.featured} onChange={(e) => setForm((current) => ({ ...current, featured: e.target.checked }))} className="h-4 w-4 accent-[#40533d]" />Popular</label>
+              <button disabled={creating} className="self-end rounded-xl bg-[#40533d] px-4 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#30412e] disabled:opacity-60 lg:col-span-1">{creating ? "Adding…" : "Add equipment"}</button>
             </form>
           )}
 

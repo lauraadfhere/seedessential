@@ -1,6 +1,6 @@
 "use client";
 
-import { getParse } from "@/lib/parse/client";
+import { getSessionSecret } from "@/lib/appwrite/client";
 
 export class ApiError extends Error {
   constructor(message: string, public status: number, public fields?: Record<string, string>) {
@@ -9,7 +9,7 @@ export class ApiError extends Error {
 }
 
 export function sessionToken() {
-  return getParse().User.current()?.getSessionToken() ?? "";
+  return getSessionSecret() ?? "";
 }
 
 export function authHeaders(extra: HeadersInit = {}): HeadersInit {
@@ -17,7 +17,7 @@ export function authHeaders(extra: HeadersInit = {}): HeadersInit {
   return { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...extra };
 }
 
-/** JSON fetch against our API with the Parse session attached; throws `ApiError` with the server message. */
+/** JSON fetch against our API with the Appwrite session attached; throws `ApiError` with the server message. */
 export async function api<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
   const { json, headers, ...rest } = init;
   const response = await fetch(path, {

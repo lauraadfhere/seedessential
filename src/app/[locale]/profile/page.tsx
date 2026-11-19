@@ -12,6 +12,7 @@ import { useI18n } from "@/lib/i18n";
 import { api, uploadToCloudinary } from "@/lib/api-client";
 import { algeriaWilayas } from "@/lib/algeria";
 import { audienceLabel } from "@/lib/roles";
+import { hasCustomAvatar } from "@/lib/default-avatar";
 import { COMPANY_TYPES, GARDEN_TYPES, GROWING_INTERESTS, type AccountProfile, type BusinessProfile } from "@/lib/profile";
 
 type Draft = {
@@ -206,7 +207,7 @@ function ProfileBody() {
                 <span className="tmpl-chip">{audienceLabel(me.role, me.accountKind)}</span>
                 {me.status === "pending" && <span className="tmpl-chip tmpl-chip-alert">Pending verification</span>}
               </div>
-              {draft.avatar && <button type="button" onClick={() => set("avatar", "")} className="mt-2 text-xs font-semibold text-red-700 hover:underline">{t("profile.photoRemove")}</button>}
+              {hasCustomAvatar(draft.avatar) && <button type="button" onClick={() => set("avatar", "")} className="mt-2 text-xs font-semibold text-red-700 hover:underline">{t("profile.photoRemove")}</button>}
               <p className="mt-3 text-xs text-[#789078]">{t("profile.memberSince")} {new Date(me.createdAt).toLocaleDateString()}</p>
             </div>
           </section>
