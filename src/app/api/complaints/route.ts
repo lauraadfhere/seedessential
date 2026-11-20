@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getParseAdmin } from "@/lib/parse/admin";
-import { requireAdmin, requireUser } from "@/lib/parse/require-admin";
-import { cleanString } from "@/lib/parse/marketplace";
+import { Query } from "node-appwrite";
+import { requireAdmin, requireUser } from "@/lib/appwrite/auth";
+import { COLLECTIONS } from "@/lib/appwrite/config";
+import { createRow, getRow, listRows, updateRow } from "@/lib/appwrite/db";
 import { moderateText } from "@/lib/moderation";
 
 export const dynamic = "force-dynamic";
@@ -9,33 +10,43 @@ export const dynamic = "force-dynamic";
 const TARGETS = ["product", "service"];
 const STATUSES = ["open", "in_review", "resolved", "rejected"];
 
-/** GET /api/complaints — admin sees all complaints; a customer sees only their own. */
+function cleanString(value: unknown, max: number) {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
+
+function serialize(row: Record<string, unknown> & { $id: string; $createdAt?: string }) {
+  return {
+    id: row.$id,
+    targetType: String(row.targetType || ""),
+    targetName: String(row.targetName || ""),
+    subject: String(row.subject || ""),
+    body: String(row.body || ""),
+    status: String(row.status || "open"),
+    resolution: String(row.resolution || ""),
+    createdAt: String(row.$createdAt || ""),
+  };
+}
+
+/** GET /api/complaints — admin sees all; customers see their own. */
 export async function GET(request: Request) {
   const user = await requireUser(request);
   if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
 
-  const admin = await requireAdmin(request);
-  const Parse = getParseAdmin();
-  const query = new Parse.Query("Complaint");
-  if (!admin) query.equalTo("customer", user);
-  const items = await query.include("customer").descending("createdAt").limit(200).find({ useMasterKey: true });
+  const admin = user.role === "admin" ? user : null;
+  const queries = admin
+    ? [Query.orderDesc("$createdAt"), Query.limit(200)]
+    : [Query.equal("userId", user.id), Query.orderDesc("$createdAt"), Query.limit(100)];
 
-  return NextResponse.json(
-    items.map((item) => ({
-      id: item.id,
-      targetType: item.get("targetType"),
-      targetName: item.get("targetName"),
-      subject: item.get("subject"),
-      body: item.get("body"),
-      status: item.get("status"),
-      resolution: item.get("resolution") ?? "",
-      createdAt: item.createdAt?.toISOString(),
-    })),
-    { headers: { "Cache-Control": "private, no-store" } },
-  );
+  try {
+    const listed = await listRows(COLLECTIONS.claims, queries);
+    return NextResponse.json(listed.rows.map(serialize), { headers: { "Cache-Control": "private, no-store" } });
+  } catch (error) {
+    console.error("Error fetching complaints:", error);
+    return NextResponse.json([], { headers: { "Cache-Control": "private, no-store" } });
+  }
 }
 
-/** POST /api/complaints — a signed-in customer files a complaint about a product or service. */
+/** POST /api/complaints — file a complaint. */
 export async function POST(request: Request) {
   const user = await requireUser(request);
   if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
@@ -52,41 +63,40 @@ export async function POST(request: Request) {
   if (!message.text) return NextResponse.json({ error: "Describe your complaint." }, { status: 400 });
 
   try {
-    const Parse = getParseAdmin();
-    const item = new (Parse.Object.extend("Complaint"))();
-    item.set({
-      customer: user,
+    const item = await createRow(COLLECTIONS.claims, {
+      userId: user.id,
       targetType,
       targetName,
       subject,
       body: message.text,
       status: message.hold ? "pending" : "open",
-      moderationFlags: message.flags,
       resolution: "",
     });
-    await item.save(null, { useMasterKey: true });
-    return NextResponse.json({ ok: true, id: item.id }, { status: 201 });
+    return NextResponse.json({ ok: true, id: item.$id }, { status: 201 });
   } catch (error) {
     console.error("Error saving complaint:", error);
     return NextResponse.json({ error: "Could not send your complaint. Please try again." }, { status: 500 });
   }
 }
 
-/** PATCH /api/complaints — admin updates status and resolution: `{ id, status, resolution }`. */
+/** PATCH /api/complaints — admin updates status and resolution. */
 export async function PATCH(request: Request) {
   const admin = await requireAdmin(request);
   if (!admin) return NextResponse.json({ error: "Administrator access required" }, { status: 403 });
 
   const body = await request.json().catch(() => ({}));
-  const id = cleanString(body.id, 40);
+  const id = cleanString(body.id, 64);
   const status = STATUSES.includes(body.status) ? body.status : null;
   if (!id || !status) return NextResponse.json({ error: "Invalid complaint update." }, { status: 400 });
 
-  const Parse = getParseAdmin();
-  const item = await new Parse.Query("Complaint").get(id, { useMasterKey: true }).catch(() => undefined);
-  if (!item) return NextResponse.json({ error: "Complaint not found" }, { status: 404 });
-
-  item.set({ status, resolution: cleanString(body.resolution, 2000), handledBy: admin });
-  await item.save(null, { useMasterKey: true });
-  return NextResponse.json({ ok: true });
+  try {
+    await getRow(COLLECTIONS.claims, id);
+    await updateRow(COLLECTIONS.claims, id, {
+      status,
+      resolution: cleanString(body.resolution, 2000),
+    });
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: "Complaint not found" }, { status: 404 });
+  }
 }

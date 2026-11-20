@@ -34,19 +34,23 @@ export async function GET(request: Request) {
       counts.verified = expert.status === "active" ? 1 : 0;
       attention = counts.inbox + counts.matched;
     } else if (user.role === "admin") {
-      const pending = await listRows(COLLECTIONS.consultationRequests, [
-        Query.equal("moderationStatus", "pending"),
-        Query.limit(100),
-      ]);
-      const experts = await listRows(COLLECTIONS.expertProfiles, [
-        Query.equal("status", "pending"),
-        Query.limit(100),
+      const [pending, expertsPending, requests, experts, profiles, claims] = await Promise.all([
+        listRows(COLLECTIONS.consultationRequests, [Query.equal("moderationStatus", "pending"), Query.limit(100)]),
+        listRows(COLLECTIONS.expertProfiles, [Query.equal("status", "pending"), Query.limit(100)]),
+        listRows(COLLECTIONS.consultationRequests, [Query.limit(100)]),
+        listRows(COLLECTIONS.expertProfiles, [Query.limit(100)]),
+        listRows(COLLECTIONS.profiles, [Query.limit(100)]),
+        listRows(COLLECTIONS.claims, [Query.limit(100)]),
       ]);
       counts.requests = pending.total;
-      counts.experts = experts.total;
+      counts.experts = expertsPending.total;
       counts.messages = 0;
       counts.listings = 0;
-      attention = counts.requests + counts.experts;
+      counts.users = profiles.total;
+      counts.requestsTotal = requests.total;
+      counts.expertsTotal = experts.total;
+      counts.claims = claims.rows.filter((row) => ["open", "in_review", "pending"].includes(String(row.status || "open"))).length;
+      attention = counts.requests + counts.experts + counts.claims;
     } else if (user.role === "provider") {
       counts.listings = 0;
       counts.pending = 0;

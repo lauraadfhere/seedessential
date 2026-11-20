@@ -270,13 +270,17 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ name: "", category: equipmentCategories[0]?.slug ?? "tools", price: "", priceDZD: "", short: "", featured: true });
   const [queue, setQueue] = useState<Record<string, number>>({});
+  const [stats, setStats] = useState<Record<string, number>>({});
 
   useEffect(() => {
     void fetchMe().then((user) => {
       if (user?.role !== "admin") return;
-      fetch("/api/marketplace/summary", opts())
+      fetch("/api/admin/summary", opts())
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((summary) => setQueue(summary.counts ?? {}))
+        .then((summary) => {
+          setQueue(summary.queue ?? summary.counts ?? {});
+          setStats(summary.counts ?? {});
+        })
         .catch(() => undefined);
     });
   }, []);
@@ -404,11 +408,24 @@ export default function AdminPage() {
                 {items.filter((item) => item.visibilityStatus === "pending").length} listings awaiting review
               </div>
             </div>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { label: "Requests held for moderation", value: queue.requests ?? 0, href: "moderation" },
-                { label: "Flagged messages", value: queue.messages ?? 0, href: "moderation" },
-                { label: "Experts awaiting verification", value: queue.experts ?? 0, href: "experts" },
+                { label: "Accounts", value: stats.users ?? 0, href: "users" },
+                { label: "Experts", value: stats.expertsTotal ?? stats.experts ?? 0, href: "experts" },
+                { label: "Consultation requests", value: stats.requestsTotal ?? stats.requests ?? 0, href: "consultations" },
+                { label: "Open claims", value: stats.claimsOpen ?? stats.claims ?? 0, href: "claims" },
+              ].map((item) => (
+                <button key={item.label} onClick={() => openWorkspace(item.href)} className="flex items-center justify-between rounded-2xl border border-[#dce5dc] bg-white px-4 py-3.5 text-left text-sm text-[#18231b] transition hover:border-[#b7c4b4]">
+                  <span className="font-semibold">{item.label}</span>
+                  <span className="text-xl font-semibold">{item.value}</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {[
+                { label: "Requests held for moderation", value: queue.requests ?? stats.moderationPending ?? 0, href: "moderation" },
+                { label: "Open / matched requests", value: (stats.requestsOpen ?? 0) + (stats.requestsMatched ?? 0), href: "consultations" },
+                { label: "Experts awaiting verification", value: queue.experts ?? stats.expertsPending ?? 0, href: "experts" },
               ].map((item) => (
                 <button key={item.label} onClick={() => openWorkspace(item.href)} className={`flex items-center justify-between rounded-2xl border px-4 py-3.5 text-left text-sm transition ${item.value ? "border-amber-300 bg-amber-50 text-amber-900" : "border-[#dce5dc] bg-white text-[#607060] hover:border-[#b7c4b4]"}`}>
                   <span className="font-semibold">{item.label}</span>

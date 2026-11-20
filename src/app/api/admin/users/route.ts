@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
-import type Parse from "parse/node";
-import { requireAdmin } from "@/lib/parse/require-admin";
-import { getParseAdmin } from "@/lib/parse/admin";
+import { Query } from "node-appwrite";
+import { requireAdmin } from "@/lib/appwrite/auth";
+import { createAdminClient } from "@/lib/appwrite/admin";
+import { COLLECTIONS } from "@/lib/appwrite/config";
+import { listRows, updateRow } from "@/lib/appwrite/db";
+
+export const dynamic = "force-dynamic";
 
 const ROLES = ["admin", "customer", "expert", "provider"] as const;
 const STATUSES = ["active", "pending", "suspended"] as const;
 
 /**
- * Admin endpoint to manage user accounts.
- * GET  - List users, optionally filtered by ?q= (email/username/name) and ?role=
- * PATCH - Update a user's role or status ({ userId, role?, status? })
+ * Admin users — Appwrite profiles (+ Auth user email fallback).
+ * GET  ?q=&role=
+ * PATCH { userId, role?, status? }
  */
 export async function GET(request: Request) {
   if (!(await requireAdmin(request))) {
@@ -17,25 +21,30 @@ export async function GET(request: Request) {
   }
 
   try {
-    const Parse = getParseAdmin();
     const { searchParams } = new URL(request.url);
-    const q = (searchParams.get("q") || "").trim();
+    const q = (searchParams.get("q") || "").trim().toLowerCase();
     const role = searchParams.get("role") || "";
 
-    const pattern = new RegExp(escapeRegex(q), "i");
-    const query = q
-      ? Parse.Query.or(
-          new Parse.Query(Parse.User).matches("email", pattern),
-          new Parse.Query(Parse.User).matches("name", pattern),
-          new Parse.Query(Parse.User).matches("username", pattern),
-        )
-      : new Parse.Query(Parse.User);
-    if (role && (ROLES as readonly string[]).includes(role)) query.equalTo("role", role);
-    query.descending("createdAt");
-    query.limit(200);
+    const queries = [Query.orderDesc("$createdAt"), Query.limit(200)];
+    if (role && (ROLES as readonly string[]).includes(role)) queries.unshift(Query.equal("role", role));
 
-    const results = await query.find({ useMasterKey: true });
-    return NextResponse.json(results.map(serializeUser));
+    const listed = await listRows(COLLECTIONS.profiles, queries);
+    const users = listed.rows
+      .map((row) => ({
+        id: String(row.userId || row.$id),
+        profileId: row.$id,
+        name: String(row.name || ""),
+        email: String(row.email || ""),
+        role: String(row.role || "customer"),
+        status: String(row.status || "active"),
+        createdAt: String(row.$createdAt || ""),
+      }))
+      .filter((user) => {
+        if (!q) return true;
+        return user.email.toLowerCase().includes(q) || user.name.toLowerCase().includes(q);
+      });
+
+    return NextResponse.json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
@@ -52,9 +61,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const { userId, role, status } = body as { userId?: string; role?: string; status?: string };
 
-    if (!userId) {
-      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
-    }
+    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     if (role !== undefined && !(ROLES as readonly string[]).includes(role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
@@ -65,30 +72,43 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "You cannot suspend or demote your own account" }, { status: 400 });
     }
 
-    const Parse = getParseAdmin();
-    const user = await new Parse.Query(Parse.User).get(userId, { useMasterKey: true });
-    if (role !== undefined) user.set("role", role);
-    if (status !== undefined) user.set("status", status);
-    await user.save(null, { useMasterKey: true });
+    const listed = await listRows(COLLECTIONS.profiles, [Query.equal("userId", userId), Query.limit(1)]);
+    const profile = listed.rows[0];
+    if (!profile) return NextResponse.json({ error: "User profile not found" }, { status: 404 });
 
-    return NextResponse.json({ message: "User updated", user: serializeUser(user) });
+    const patch: Record<string, unknown> = {};
+    if (role !== undefined) patch.role = role;
+    if (status !== undefined) patch.status = status;
+    const updated = await updateRow(COLLECTIONS.profiles, profile.$id, patch);
+
+    try {
+      const { users } = createAdminClient();
+      const prefs = (await users.get({ userId })).prefs || {};
+      await users.updatePrefs({
+        userId,
+        prefs: {
+          ...prefs,
+          ...(role !== undefined ? { role } : {}),
+          ...(status !== undefined ? { status } : {}),
+        },
+      });
+    } catch (error) {
+      console.error("Could not sync Auth prefs:", error);
+    }
+
+    return NextResponse.json({
+      message: "User updated",
+      user: {
+        id: userId,
+        name: String(updated.name || ""),
+        email: String(updated.email || ""),
+        role: String(updated.role || "customer"),
+        status: String(updated.status || "active"),
+        createdAt: String(updated.$createdAt || ""),
+      },
+    });
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }
-}
-
-function escapeRegex(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function serializeUser(user: Parse.User) {
-  return {
-    id: user.id,
-    name: user.get("name") || "",
-    email: user.get("email") || user.get("username") || "",
-    role: user.get("role") || "customer",
-    status: user.get("status") || "active",
-    createdAt: user.createdAt,
-  };
 }
