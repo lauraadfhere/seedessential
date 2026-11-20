@@ -70,7 +70,7 @@ export function serializeAppwriteRequest(
     recommendation: String(row.recommendation || ""),
     maintenancePlan: String(row.maintenancePlan || ""),
     estimatedBudget: Number(row.budget || 0),
-    recommendedProducts: [],
+    recommendedProducts: Array.isArray(row.recommendedProducts) ? (row.recommendedProducts as { slug: string; name: string; note?: string; providerName?: string }[]) : [],
     messagesCount,
     viewer: {
       role: viewer.role === "admin" || viewer.role === "expert" || viewer.role === "customer" ? viewer.role : "viewer",

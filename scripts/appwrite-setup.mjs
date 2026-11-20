@@ -105,6 +105,8 @@ for (const [id, name] of [
   ["request_messages", "Request messages"],
   ["businesses", "Businesses"],
   ["claims", "Claims"],
+  ["ruddge_threads", "Ruddge threads"],
+  ["ruddge_messages", "Ruddge messages"],
 ]) {
   await ensureTable(id, name);
 }
@@ -216,6 +218,19 @@ await ensureString("claims", "body", 4000);
 await ensureString("claims", "status", 32);
 await ensureString("claims", "resolution", 2000);
 
+await ensureString("ruddge_threads", "userId", 64, true);
+await ensureString("ruddge_threads", "title", 120);
+await ensureString("ruddge_threads", "plant", 80);
+await ensureString("ruddge_threads", "locale", 8);
+
+await ensureString("ruddge_messages", "threadId", 64, true);
+await ensureString("ruddge_messages", "authorId", 64);
+await ensureString("ruddge_messages", "role", 16, true);
+await ensureString("ruddge_messages", "body", 4000);
+await ensureString("ruddge_messages", "photos", 200, false, true);
+await ensureString("ruddge_messages", "analysisJson", 8000);
+await ensureString("ruddge_messages", "model", 120);
+
 console.log("Waiting for columns…");
 await sleep(8000);
 
@@ -230,6 +245,9 @@ await ensureIndex("consultation_requests", "assigned_idx", "key", ["assignedExpe
 await ensureIndex("request_messages", "request_idx", "key", ["requestId"]);
 await ensureIndex("businesses", "userId_unique", "unique", ["userId"]);
 await ensureIndex("claims", "user_idx", "key", ["userId"]);
+await ensureIndex("ruddge_threads", "user_idx", "key", ["userId"]);
+await ensureIndex("ruddge_messages", "thread_idx", "key", ["threadId"]);
+await ensureIndex("ruddge_messages", "author_idx", "key", ["authorId"]);
 
 await sleep(4000);
 

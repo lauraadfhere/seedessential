@@ -9,10 +9,10 @@ import { ProductVisual } from "@/components/product-card";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { Avatar, EmptyState, Notice, PhotoGallery, PhotoPicker, StarInput, StatusPill, StatusTimeline, UrgencyTag, timeAgo } from "@/components/marketplace";
 import { api } from "@/lib/api-client";
-import { getParse } from "@/lib/parse/client";
 import { products as seededProducts, type Product } from "@/lib/data";
 import { categoryLabel, type RecommendedProduct, type RequestMessage, type RequestRecord } from "@/lib/marketplace-types";
 import { MODERATION_FLAG_LABELS } from "@/lib/moderation";
+import { useAccount } from "@/components/header-parts";
 
 type Detail = { request: RequestRecord; messages: RequestMessage[] };
 
@@ -167,11 +167,12 @@ function RecommendForm({ request, catalog, onSaved }: { request: RequestRecord; 
 }
 
 function Thread({ request, messages, setMessages, canWrite, isAdmin }: { request: RequestRecord; messages: RequestMessage[]; setMessages: (update: (all: RequestMessage[]) => RequestMessage[]) => void; canWrite: boolean; isAdmin: boolean }) {
+  const { account } = useAccount();
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState("");
-  const currentUserId = getParse().User.current()?.id;
+  const currentUserId = account?.id;
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => { end.current?.scrollIntoView({ block: "nearest" }); }, [messages.length]);
 
@@ -315,7 +316,7 @@ function RequestDetail() {
   const [notice, setNotice] = useState("");
   const request = data?.request;
   const participant = Boolean(request && (request.viewer.isOwner || request.viewer.isAssignedExpert || request.viewer.role === "admin"));
-  const catalog = useCatalog(Boolean(request && (request.recommendedProducts.length || request.viewer.actions.includes("recommend"))));
+  const catalog = useCatalog(Boolean(request && ((request.recommendedProducts?.length ?? 0) || request.viewer.actions.includes("recommend"))));
 
   const load = useCallback(
     () =>

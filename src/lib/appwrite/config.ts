@@ -21,6 +21,8 @@ export const COLLECTIONS = {
   requestMessages: "request_messages",
   businesses: "businesses",
   claims: "claims",
+  ruddgeThreads: "ruddge_threads",
+  ruddgeMessages: "ruddge_messages",
 } as const;
 
 export const SESSION_STORAGE_KEY = "tannelli_appwrite_session";

@@ -24,12 +24,16 @@ If you prefer to keep them out of source, set them as **Build variables and secr
 
 | Variable | Used for | Read by |
 |---|---|---|
-| `PARSE_MASTER_KEY` | privileged server-side Parse writes | `src/lib/parse/admin.ts` |
+| `APPWRITE_API_KEY` | privileged Appwrite server client (auth, TablesDB) | `src/lib/appwrite/admin.ts` |
+| `APPWRITE_DATABASE_ID` | Appwrite database / tables id | `src/lib/appwrite/config.ts` |
+| `PARSE_MASTER_KEY` | privileged server-side Parse writes (legacy) | `src/lib/parse/admin.ts` |
 | `CLOUDINARY_API_KEY` | signed uploads | `src/lib/cloudinary.ts`, `src/app/api/cloudinary/sign/route.ts` |
 | `CLOUDINARY_API_SECRET` | signing uploads | `src/lib/cloudinary.ts` |
 | `NVIDIA_API_KEY` | AI engine | `src/lib/ruddge/engine.ts` |
 
 ```bash
+npx wrangler secret put APPWRITE_API_KEY
+npx wrangler secret put APPWRITE_DATABASE_ID
 npx wrangler secret put PARSE_MASTER_KEY
 npx wrangler secret put CLOUDINARY_API_KEY
 npx wrangler secret put CLOUDINARY_API_SECRET
